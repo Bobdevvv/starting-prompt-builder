@@ -71,6 +71,20 @@ describe("the builder hands out the tested prompt", () => {
   });
 });
 
+// The builder tells visitors that nothing they enter is sent or saved. These
+// checks keep that sentence true: none of the shipped files may use the network
+// or browser storage.
+describe("the privacy note stays true", () => {
+  const FORBIDDEN = [/\bfetch\s*\(/, /XMLHttpRequest/, /WebSocket/, /EventSource/, /sendBeacon/, /localStorage/,
+    /sessionStorage/, /indexedDB/, /document\.cookie/, /navigator\.serviceWorker/, /new\s+Image\s*\(/, /import\s*\(/];
+  for (const file of ["src/view.ts", "src/engine.ts", "src/modules.data.ts"]) {
+    it(`${file} makes no network requests and stores nothing`, () => {
+      const source = readText(file);
+      for (const pattern of FORBIDDEN) expect(source, `${file} matches ${pattern}`).not.toMatch(pattern);
+    });
+  }
+});
+
 describe("generated module data", () => {
   it("src/modules.data.ts matches modules/*.md (run npm run build:modules if not)", () => {
     expect(readText("src/modules.data.ts")).toBe(renderModuleDataFile());

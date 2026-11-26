@@ -173,7 +173,11 @@ export function rulesFor(moduleData: ModuleData, variant: string | null, target:
 }
 
 function filledProject(project: ProjectDescription): ProjectDescription {
-  const valueOr = (value: string, placeholder: string): string => value.trim() || placeholder;
+  // A field may hold several lines. Follow-on lines are indented two spaces so
+  // they stay inside their Markdown list item; blank lines are dropped.
+  const valueOr = (value: string, placeholder: string): string =>
+    value.replace(/\r\n?/g, "\n").trim().split("\n").map((line) => line.trim()).filter(Boolean).join("\n  ")
+    || placeholder;
   return {
     what: valueOr(project.what, PROJECT_PLACEHOLDERS.what),
     stack: valueOr(project.stack, PROJECT_PLACEHOLDERS.stack),

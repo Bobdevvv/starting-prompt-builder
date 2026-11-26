@@ -46,19 +46,34 @@ const GIT_OPTIONS: ReadonlyArray<{ value: GitChoice; label: string }> = [
 ];
 
 /** Project facts. `isAsked` hides a fact that the answers above already decided. */
-const FACTS: ReadonlyArray<{ key: BooleanAnswer; label: string; isAsked: (a: Answers) => boolean }> = [
-  { key: "usesPackages", label: "Uses third-party packages", isAsked: (a) => a.security !== "strict" },
+interface Fact {
+  readonly key: BooleanAnswer;
+  readonly label: string;
+  /**
+   * When the answers above already settle this fact, the box stays in place
+   * (so nothing jumps), shown as ticked or not and disabled, with the reason.
+   */
+  readonly settledBy?: (a: Answers) => { readonly isChecked: boolean; readonly note: string } | null;
+  /** A follow-up shown only when its parent fact is ticked, indented under it, at the end of the list. */
+  readonly showsWhen?: (a: Answers) => boolean;
+}
+
+const FACTS: readonly Fact[] = [
+  { key: "usesPackages", label: "Uses third-party packages",
+    settledBy: (a) => (a.security === "strict" ? { isChecked: true, note: "Included: strict security covers packages" } : null) },
   { key: "hasTests", label: "Has, or should have, automated tests",
-    isAsked: (a) => a.process !== "thorough" && a.audience !== "other-people" },
-  { key: "isPublicRepo", label: "The repository is public", isAsked: () => true },
-  { key: "hasInterface", label: "Has a user interface (website, app or screens)", isAsked: () => true },
-  { key: "handlesUserData", label: "Handles data about its users", isAsked: () => true },
-  { key: "promisesNoTracking", label: "Promises users they aren't tracked", isAsked: (a) => a.handlesUserData },
-  { key: "isDeployed", label: "Gets deployed, or runs on a server", isAsked: () => true },
+    settledBy: (a) => (a.process === "thorough" ? { isChecked: true, note: "Included: thorough process requires tests" }
+      : a.audience === "other-people" ? { isChecked: true, note: "Included: other people will use it" } : null) },
+  { key: "isPublicRepo", label: "The repository is public" },
+  { key: "hasInterface", label: "Has a user interface (website, app or screens)" },
+  { key: "isDeployed", label: "Gets deployed, or runs on a server" },
   { key: "spansManySessions", label: "I'll work on it over many sessions",
-    isAsked: (a) => a.target === "code" && a.process !== "thorough" },
-  { key: "wantsToLearn", label: "I want to learn along the way", isAsked: () => true },
-  { key: "hasReadableText", label: "Has documentation or other text people read", isAsked: () => true },
+    settledBy: (a) => (a.target === "browser" ? { isChecked: false, note: "Only applies in Claude Code" }
+      : a.process === "thorough" ? { isChecked: true, note: "Included: thorough process keeps a work log" } : null) },
+  { key: "wantsToLearn", label: "I want to learn along the way" },
+  { key: "hasReadableText", label: "Has documentation or other text people read" },
+  { key: "handlesUserData", label: "Handles data about its users" },
+  { key: "promisesNoTracking", label: "…and promises them they aren't tracked", showsWhen: (a) => a.handlesUserData },
 ];
 
 const PROJECT_FIELDS: ReadonlyArray<{ key: keyof ProjectDescription; label: string; hint: string }> = [
@@ -109,6 +124,14 @@ const STYLE_TEXT = `
 .cssk-detail { margin: 6px 0 0; font-size: 0.8125rem; color: var(--color-muted); min-height: 1.45em; }
 .cssk-facts { display: grid; grid-template-columns: 1fr; gap: 0 16px; }
 @container (min-width: 460px) { .cssk-facts { grid-template-columns: 1fr 1fr; } }
+.cssk-check > span { display: block; }
+.cssk-note { display: block; font-size: 0.75rem; color: var(--color-muted); }
+.cssk-check input:disabled { opacity: 0.6; cursor: default; }
+.cssk-check:has(input:disabled) { cursor: default; color: var(--color-muted); }
+.cssk-follow-up { grid-column: 1 / -1; padding-left: 28px; }
+.cssk-privacy { margin: 0; padding: 8px 14px; border-bottom: 1px solid var(--color-border); font-size: 0.8125rem;
+  color: var(--color-muted); }
+.cssk-privacy strong { color: var(--color-up); font-weight: 600; }
 .cssk-check { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; font-size: 0.875rem; }
 .cssk input[type="checkbox"] { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--color-accent); }
 .cssk select, .cssk input[type="text"], .cssk textarea { width: 100%; min-height: 44px; font: inherit;
@@ -138,8 +161,7 @@ const STYLE_TEXT = `
 .cssk-module .cssk-check { min-height: 36px; font-weight: 600; }
 .cssk-module p { margin: 0 0 6px 28px; font-size: 0.8125rem; color: var(--color-muted); }
 .cssk-module select { margin-left: 28px; width: calc(100% - 28px); min-height: 40px; }
-.cssk-fields { display: grid; grid-template-columns: 1fr; gap: 0 12px; }
-@container (min-width: 460px) { .cssk-fields { grid-template-columns: 1fr 1fr; } }
+.cssk-fields { display: grid; grid-template-columns: 1fr; }
 .cssk-field { display: block; margin-top: 10px; }
 .cssk-field .cssk-label { display: block; margin-bottom: 4px; }
 .cssk-list { list-style: none; margin: 8px 0 12px; padding: 0; font-size: 0.8125rem; }
@@ -163,6 +185,9 @@ const STYLE_TEXT = `
 .cssk-tabs button[aria-pressed="true"] { color: var(--color-text); border-color: var(--color-border);
   background: var(--color-bg); }
 .cssk-size { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted); }
+.cssk textarea.cssk-grow { font-family: inherit; font-size: 0.875rem; line-height: 1.45; min-height: 44px;
+  max-height: 240px; resize: vertical; field-sizing: content; }
+@media (pointer: coarse) { .cssk textarea.cssk-grow { font-size: 16px; } }
 .cssk textarea { font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.55; min-height: 300px;
   resize: vertical; }
 .cssk-status { min-height: 1.45em; margin-top: 8px; font-size: 0.8125rem; color: var(--color-muted); }
@@ -231,6 +256,9 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   const sideColumn = element("div", { class: "cssk-side" });
   ticket.append(
     element("div", { class: "cssk-bar" }, [element("span", {}, ["Starting prompt builder"]), element("span", {}, [barCount])]),
+    // True by construction: this file makes no network requests and stores nothing (no storage, no cookies).
+    element("p", { class: "cssk-privacy" }, [element("strong", {}, ["Private: "]),
+      "everything you enter here stays in your browser. It isn't sent anywhere or saved, and it's gone when you leave the page."]),
     element("div", { class: "cssk-grid" }, [mainColumn, sideColumn]),
   );
   container.append(ticket);
@@ -288,24 +316,37 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   mainColumn.append(gitField);
 
   // Facts about the project.
-  const factLabels = new Map<BooleanAnswer, HTMLLabelElement>();
+  const factControls = new Map<BooleanAnswer, { label: HTMLLabelElement; input: HTMLInputElement; note: HTMLElement }>();
   const facts = element("div", { class: "cssk-facts" });
   for (const fact of FACTS) {
     const input = element("input", { type: "checkbox" });
     input.addEventListener("change", () => { answers = { ...answers, [fact.key]: input.checked }; update(); }, { signal });
-    const label = element("label", { class: "cssk-check" }, [input, fact.label]);
-    factLabels.set(fact.key, label);
+    const note = element("small", { class: "cssk-note" });
+    const label = element("label", { class: fact.showsWhen ? "cssk-check cssk-follow-up" : "cssk-check" }, [
+      input, element("span", {}, [fact.label, note])]);
+    factControls.set(fact.key, { label, input, note });
     facts.append(label);
   }
   mainColumn.append(element("fieldset", {}, [
     element("legend", {}, [element("span", { class: "cssk-label" }, ["The project (select all that apply)"])]), facts]));
 
   // The project description, all optional.
+  // The fields grow with their text (CSS field-sizing where supported, a height fallback elsewhere),
+  // so longer descriptions stay readable and easy to edit.
+  const canSizeFieldsInCss = typeof CSS !== "undefined" && CSS.supports("field-sizing", "content");
   const fields = element("div", { class: "cssk-fields" });
   for (const field of PROJECT_FIELDS) {
     const inputId = `${idPrefix}-p-${field.key}`;
-    const input = element("input", { type: "text", id: inputId, placeholder: field.hint, autocomplete: "off" });
-    input.addEventListener("input", () => { project = { ...project, [field.key]: input.value }; update(); }, { signal });
+    const input = element("textarea", { id: inputId, class: "cssk-grow", rows: "1", placeholder: `For example: ${field.hint}`,
+      autocomplete: "off" });
+    input.addEventListener("input", () => {
+      if (!canSizeFieldsInCss) {
+        input.style.height = "auto";
+        input.style.height = `${input.scrollHeight + 2}px`;
+      }
+      project = { ...project, [field.key]: input.value };
+      update();
+    }, { signal });
     fields.append(element("label", { class: "cssk-field", for: inputId }, [
       element("span", { class: "cssk-label" }, [field.label]), input]));
   }
@@ -476,11 +517,14 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
     }
     gitField.hidden = answers.target !== "code";
     for (const fact of FACTS) {
-      const label = factLabels.get(fact.key);
-      if (!label) continue;
-      label.hidden = !fact.isAsked(answers);
-      const input = label.querySelector("input");
-      if (input) input.checked = answers[fact.key];
+      const controls = factControls.get(fact.key);
+      if (!controls) continue;
+      controls.label.hidden = fact.showsWhen ? !fact.showsWhen(answers) : false;
+      const settled = fact.settledBy?.(answers) ?? null;
+      controls.input.disabled = settled !== null;
+      controls.input.checked = settled ? settled.isChecked : answers[fact.key];
+      controls.note.textContent = settled?.note ?? "";
+      controls.note.hidden = settled === null;
     }
 
     const choices = resolveChoices(answers, overrides);

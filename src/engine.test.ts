@@ -140,6 +140,11 @@ describe("assemblePrompt", () => {
     expect(prompt).toContain("a tool that costs $& and $1");
   });
 
+  it("keeps a field with several lines inside its list item", () => {
+    const prompt = assemblePrompt("code", choices, { ...EMPTY_PROJECT, goal: "first line\r\n\n  second line  \n" });
+    expect(prompt).toContain("- **This session's goal:** first line\n  second line\n");
+  });
+
   it("never includes the parts of a module meant for the person choosing it", () => {
     const allChoices = resolveChoices(answers({ security: "strict", process: "thorough", isDeployed: true }), {});
     const prompt = assemblePrompt("code", allChoices, EMPTY_PROJECT);
