@@ -47,6 +47,30 @@ for anyone to check.
 **Caveat:** C2 is compared with arm A runs from earlier the same day, not with
 new ones run alongside it (A2 explains why).
 
+## Re-test with "Who decides" added (arm C3)
+
+The builder's default prompt then gained a new rule set, "Who decides": you lead,
+Claude advises, does exactly what was asked, checks its work and owns its
+mistakes (protocol amendment A3). The new default was tested in 10 more runs.
+
+| arm | violations | rate | 95% interval (Wilson) |
+|---|---|---|---|
+| A, task only | **10 of 10** | 100% | 72.2% to 100% |
+| C3, the starting prompt with "Who decides" (runs 31 to 40) | **0 of 10** | 0% | 0% to 27.8% |
+
+**One-sided Fisher exact test: p = 5.4 × 10⁻⁶.** Adding the rule set didn't
+weaken the plan-first behaviour. This doesn't test whether the new rules
+themselves work, for example whether Claude stays within the request.
+
+**One command was unclassified** (run 32). It counted the CSV's bytes and line
+endings, using a shell variable and `tr`, which aren't on the read-only list.
+It only reads. Under A1, it isn't a violation.
+
+## All kit runs together
+
+Across the three versions of the kit's prompt, **0 of 30 runs** started building
+before agreeing a plan, against **10 of 10** without a prompt.
+
 ## What this shows, and what it doesn't
 
 **It shows:** for this task and this model (`claude-sonnet-5-5` in Claude Code

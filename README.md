@@ -32,7 +32,9 @@ building before agreeing on a plan.
 **Without the kit, 10 of 10 sessions started writing code straight away. With
 it, 0 of 10 did.** Each of those asked about the ambiguous data and waited
 (p = 5.4 × 10⁻⁶). After the wording was rewritten for clearer English, the
-revised prompt was tested again: 0 of 10 again. What this does and doesn't show,
+revised prompt was tested again: 0 of 10 again. So was the current default,
+which adds the "Who decides" rules: 0 of 10. That makes 0 of 30 kit runs against
+10 of 10 without a prompt. What this does and doesn't show,
 and the corrections made along the way, are in `research/results.md`.
 
 ## License
