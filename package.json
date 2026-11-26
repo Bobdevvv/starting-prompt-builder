@@ -12,7 +12,8 @@
     "test": "node scripts/build-modules.mjs --check && vitest run src tests",
     "test:research": "node --test research/score.test.mjs",
     "typecheck": "tsc --noEmit",
-    "size": "node scripts/check-size.mjs"
+    "size": "node scripts/check-size.mjs",
+    "handover": "node scripts/build-handover.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2",
