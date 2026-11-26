@@ -6,10 +6,10 @@
 
 ## Tool calls, in order
 
-- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-16-38728-1795703827904" && git ls-files && echo "--- log" && git log --stat --format='%h %an %ad %s' && echo "--- status" && git status --short --ignored && echo "--- node" && node --version && npm --version`
+- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-16" && git ls-files && echo "--- log" && git log --stat --format='%h %an %ad %s' && echo "--- status" && git status --short --ignored && echo "--- node" && node --version && npm --version`
 - **Glob** (ok): `**/*`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-16-38728-1795703827904\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-16-38728-1795703827904\exports\orders.csv`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-16\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-16\exports\orders.csv`
 
 ## Final reply
 

@@ -6,10 +6,10 @@
 
 ## Tool calls, in order
 
-- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-18-38728-1795703874372" && git ls-files && git log --stat --oneline && git status --short --ignored && ls -la && node --version`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-18-38728-1795703874372\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-18-38728-1795703874372\exports\orders.csv`
-- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-18-38728-1795703874372" && od -c exports/orders.csv; git config --get core.autocrlf; npm --version`
+- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-18" && git ls-files && git log --stat --oneline && git status --short --ignored && ls -la && node --version`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-18\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-18\exports\orders.csv`
+- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-18" && od -c exports/orders.csv; git config --get core.autocrlf; npm --version`
 - **Grep** (ok): `\r$`
 - **Grep** (ok): `^\xEF\xBB\xBF|^\x{FEFF}|[^\x00-\x7F]`
 

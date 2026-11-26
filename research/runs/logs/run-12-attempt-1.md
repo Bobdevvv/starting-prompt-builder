@@ -7,8 +7,8 @@
 ## Tool calls, in order
 
 - **Bash** (ok): `git log --oneline --stat | head -50; echo ---; git ls-files; echo ---; ls -la; node --version`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-12-14452-1795703718624\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-12-14452-1795703718624\exports\orders.csv`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-12\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-12\exports\orders.csv`
 
 ## Final reply
 

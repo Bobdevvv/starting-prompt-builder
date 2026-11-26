@@ -58,7 +58,8 @@ function scrubLocalDetails(text) {
   for (const [needle, placeholder] of replacements) {
     if (needle && needle.length > 2) scrubbed = scrubbed.split(needle).join(placeholder);
   }
-  return scrubbed;
+  // Test folder names carry a process id and a timestamp; neither is needed.
+  return scrubbed.replace(/(claude-session-starter-trials[\\/-]run-\d+)-\d+-\d{13}/g, "$1");
 }
 
 /**

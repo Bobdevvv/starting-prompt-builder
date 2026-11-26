@@ -8,8 +8,8 @@
 
 - **Bash** (ok): `git ls-files; echo "--- status"; git status --short --ignored; echo "--- log"; git log --stat --format='%h %an %ad %s' | cat; echo "--- node"; node --version; npm --version`
 - **Glob** (ok): `**/*`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-10-14452-1795703670256\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-10-14452-1795703670256\exports\orders.csv`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-10\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-10\exports\orders.csv`
 
 ## Final reply
 

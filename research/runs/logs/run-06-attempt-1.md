@@ -7,9 +7,9 @@
 ## Tool calls, in order
 
 - **Bash** (ok): `git ls-files; echo ---; git log --stat | head -50; echo ---; ls -la`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-6-39900-1795703554417\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-6-39900-1795703554417\exports\orders.csv`
-- **Bash** (ok): `node --version; cd "<tmp>/claude-session-starter-trials/run-6-39900-1795703554417"; od -c exports/orders.csv; git config core.autocrlf`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-6\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-6\exports\orders.csv`
+- **Bash** (ok): `node --version; cd "<tmp>/claude-session-starter-trials/run-6"; od -c exports/orders.csv; git config core.autocrlf`
 - **Bash** (ok): `node --version`
 - **Grep** (ok): `\r$`
 - **Grep** (ok): `^\xEF\xBB\xBF|^\x{FEFF}|[^\x00-\x7F]`

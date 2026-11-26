@@ -6,10 +6,10 @@
 
 ## Tool calls, in order
 
-- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-4-39900-1795703504095" && git log --stat --oneline | head -50 && git ls-files && ls -la`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-4-39900-1795703504095\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-4-39900-1795703504095\exports\orders.csv`
-- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-4-39900-1795703504095" && node --version; npm --version; od -c exports/orders.csv | head -20; git config core.autocrlf; git remote -v`
+- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-4" && git log --stat --oneline | head -50 && git ls-files && ls -la`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-4\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-4\exports\orders.csv`
+- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-4" && node --version; npm --version; od -c exports/orders.csv | head -20; git config core.autocrlf; git remote -v`
 
 ## Final reply
 

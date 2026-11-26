@@ -8,9 +8,9 @@
 
 - **Bash** (ok): `git ls-files; echo; ls -la . exports; echo; wc -lc exports/*`
 - **Glob** (ok): `**/*`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-3-39900-1795703477028\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-3-39900-1795703477028\exports\orders.csv`
-- **Write** (VIOLATION): `<tmp>\claude-session-starter-trials\run-3-39900-1795703477028\csv2json.py`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-3\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-3\exports\orders.csv`
+- **Write** (VIOLATION): `<tmp>\claude-session-starter-trials\run-3\csv2json.py`
 
 ## Final reply
 

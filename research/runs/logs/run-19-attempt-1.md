@@ -6,11 +6,11 @@
 
 ## Tool calls, in order
 
-- **Bash** (ok): `cd "<tmp>\claude-session-starter-trials\run-19-38728-1795703905170" && git ls-files | head -100 && ls -la . exports && wc -lc exports/*`
+- **Bash** (ok): `cd "<tmp>\claude-session-starter-trials\run-19" && git ls-files | head -100 && ls -la . exports && wc -lc exports/*`
 - **Glob** (ok): `**/*`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-19-38728-1795703905170\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-19-38728-1795703905170\exports\orders.csv`
-- **Write** (VIOLATION): `<tmp>\claude-session-starter-trials\run-19-38728-1795703905170\csv2json.py`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-19\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-19\exports\orders.csv`
+- **Write** (VIOLATION): `<tmp>\claude-session-starter-trials\run-19\csv2json.py`
 
 ## Final reply
 

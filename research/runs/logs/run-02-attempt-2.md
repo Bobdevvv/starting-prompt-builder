@@ -6,9 +6,9 @@
 
 ## Tool calls, in order
 
-- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-2-36784-1795703230940" && git ls-files && git log --stat -5 && git status --short --ignored && node --version`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-2-36784-1795703230940\README.md`
-- **Read** (ok): `<tmp>\claude-session-starter-trials\run-2-36784-1795703230940\exports\orders.csv`
+- **Bash** (ok): `cd "<tmp>/claude-session-starter-trials/run-2" && git ls-files && git log --stat -5 && git status --short --ignored && node --version`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-2\README.md`
+- **Read** (ok): `<tmp>\claude-session-starter-trials\run-2\exports\orders.csv`
 
 ## Final reply
 
