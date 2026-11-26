@@ -1,0 +1,45 @@
+# claude-session-starter
+
+Build the first prompt of a new Claude session from a few questions. You get
+the rules that project actually needs, and none of the ones it doesn't.
+
+> Unofficial. Not affiliated with or endorsed by Anthropic.
+
+**Status: in development.** The modules are written and can be used by hand
+(see `samples/` for a full example). The builder that asks the questions and
+assembles the prompt is next.
+
+## What it will do
+
+- Ask a few yes/no questions: does the project deploy, handle user data, use
+  third-party packages, live in a public repo?
+- Pick a small **core** of rules plus the **modules** that fit the answers.
+- Produce a **kickoff prompt** to paste as the first message of a session, in
+  Claude Code or in claude.ai. For Claude Code it can also produce a short
+  `CLAUDE.md`.
+
+Every module states what it prevents. The modules are plain Markdown in
+`modules/`, so you can use them without the builder.
+
+## Does it work?
+
+One small test, with its rules fixed before the first run
+(`research/protocol.md`). Fresh Claude Code sessions get a building task, half
+of them with the kit's kickoff prompt and half without. A script reads each
+session's log and checks whether it started building before agreeing on a plan.
+Every run is reported, whatever it shows.
+
+## License
+
+- **Code** (`src/`, `scripts/`, and the scripts in `research/`): MIT, see
+  [LICENSE](LICENSE).
+- **Written content** (`modules/`, `samples/`, `docs/`, and the protocol and
+  write-ups in `research/`): Creative Commons Attribution 4.0 International,
+  see [LICENSE-CONTENT](LICENSE-CONTENT). Credit: "claude-session-starter by
+  Bob (github.com/Bobdevvv)", with a link to this repository.
+- **Your prompts are yours.** As an extra permission on top of CC BY 4.0, you
+  may use, change and publish any prompt or `CLAUDE.md` made with the builder,
+  or put together from the modules' Rules sections, without credit. That
+  includes committing it to a public repository. Credit is only asked for when
+  you republish the modules themselves, as a collection or in a kit of your
+  own.

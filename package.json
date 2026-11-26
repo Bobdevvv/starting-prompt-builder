@@ -1,0 +1,17 @@
+{
+  "name": "claude-session-starter",
+  "private": true,
+  "license": "MIT",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": "24.11.0"
+  },
+  "scripts": {
+    "test:research": "node --test research/score.test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "4.1.12"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+# Raw trial logs hold local paths and the account name. Only the scrubbed
+# copies in research/runs/logs/ are committed (see research/protocol.md §6).
+research/runs/raw/
+.env
+.env.*
+.DS_Store
+Thumbs.db
+# The host site's own brief: a copy for reference, not ours to publish.
+docs/embedded-entry-spec.md

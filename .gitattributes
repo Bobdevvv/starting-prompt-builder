@@ -1,0 +1,5 @@
+# Everything text is LF on every machine. The handover folder is copied into
+# the host site, whose source is LF; generated output must be byte-identical
+# whichever OS produced it.
+* text=auto eol=lf
+*.png binary

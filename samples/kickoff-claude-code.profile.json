@@ -1,0 +1,47 @@
+{
+  "target": "code",
+  "answers": {
+    "security": "standard",
+    "process": "light",
+    "for": "other people",
+    "packages": true,
+    "git": "pull-requests",
+    "tests": true,
+    "public": true,
+    "interface": true,
+    "userData": false,
+    "deployed": false,
+    "manySessions": false,
+    "learn": false,
+    "writing": false
+  },
+  "modules": [
+    [
+      "core"
+    ],
+    [
+      "dependencies",
+      "ask-first"
+    ],
+    [
+      "git-workflow",
+      "pull-requests"
+    ],
+    [
+      "testing",
+      "standard"
+    ],
+    [
+      "public-repo"
+    ],
+    [
+      "accessibility"
+    ]
+  ],
+  "project": {
+    "what": "a habit tracker that runs in the browser and keeps its data on the device.",
+    "stack": "TypeScript and Vite.",
+    "where": "an existing repo. Read the README and look around before you answer.",
+    "goal": "add a weekly overview screen."
+  }
+}
