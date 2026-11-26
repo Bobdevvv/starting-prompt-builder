@@ -5,14 +5,16 @@ the rules that project actually needs, and none of the ones it doesn't.
 
 > Unofficial. Not affiliated with or endorsed by Anthropic.
 
-**Status: in development.** The modules are written and can be used by hand
-(see `samples/` for a full example). The builder that asks the questions and
-assembles the prompt is next.
+**Status: in development.** The modules can be used by hand (see `samples/` for
+a full example). The builder that asks the questions and assembles the prompt
+works, and is being prepared for the owner's site.
 
 ## What it will do
 
-- Ask a few yes/no questions: does the project deploy, handle user data, use
-  third-party packages, live in a public repo?
+- Ask four quick questions (where you'll use it, how strict security should be,
+  how much process, who will use the result), then a few facts about the
+  project: does it deploy, handle user data, use third-party packages, live in
+  a public repo?
 - Pick a small **core** of rules plus the **modules** that fit the answers.
 - Produce a **starting prompt** to paste as the first message of a session, in
   Claude Code or in claude.ai. For Claude Code it can also produce a short

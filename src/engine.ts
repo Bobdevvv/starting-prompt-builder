@@ -80,7 +80,7 @@ export const EMPTY_PROJECT: ProjectDescription = { what: "", stack: "", where: "
 export const PROJECT_PLACEHOLDERS: ProjectDescription = {
   what: "[what the project is]",
   stack: "[languages and frameworks]",
-  where: "[new, or an existing repo: read the README and look around before you answer]",
+  where: "[new project, or an existing repo]",
   goal: "[what this session should achieve]",
 };
 

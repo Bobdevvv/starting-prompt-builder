@@ -107,16 +107,15 @@ reply.
 - Announce important changes (errors, results, completion) in an `aria-live`
   region or as visible text.
 
-## Size and speed budgets
+## Size and speed limits
 
-- Respect the project's budgets (for example a maximum JavaScript size, or a
-  minimum Lighthouse performance score). If there aren't any yet, propose
-  numbers before the first feature.
+- Respect the project's size and speed limits (for example a maximum
+  JavaScript size, or a minimum Lighthouse performance score). If there aren't
+  any yet, propose limits before the first feature.
 - Measure what changes, before and after, when a change adds code, assets or
   requests. Report the numbers, not an impression.
-- If a change would go over a budget, stop and report the measured size.
-  Raising a budget is my decision, and trimming quality quietly to fit is not
-  the answer.
+- If a change would go over a limit, stop and report the measured size.
+  Raising a limit is my decision. Don't quietly lower quality to stay under it.
 - Load code only where it's used. A page that doesn't need a feature shouldn't
   download it.
 

@@ -250,7 +250,7 @@ export const MODULES: readonly ModuleData[] = [
   },
   {
     "id": "budgets",
-    "title": "Size and speed budgets",
+    "title": "Size and speed limits",
     "question": "Does it ship code to people's browsers or devices, where size and speed matter?",
     "targets": [
       "code",
@@ -259,7 +259,7 @@ export const MODULES: readonly ModuleData[] = [
     "variants": [],
     "prevents": "a product that gets slower and heavier one reasonable-looking change at a time.",
     "rules": {
-      "Rules": "- Respect the project's budgets (for example a maximum JavaScript size, or a\n  minimum Lighthouse performance score). If there aren't any yet, propose\n  numbers before the first feature.\n- Measure what changes, before and after, when a change adds code, assets or\n  requests. Report the numbers, not an impression.\n- If a change would go over a budget, stop and report the measured size.\n  Raising a budget is my decision, and trimming quality quietly to fit is not\n  the answer.\n- Load code only where it's used. A page that doesn't need a feature shouldn't\n  download it.",
+      "Rules": "- Respect the project's size and speed limits (for example a maximum\n  JavaScript size, or a minimum Lighthouse performance score). If there aren't\n  any yet, propose limits before the first feature.\n- Measure what changes, before and after, when a change adds code, assets or\n  requests. Report the numbers, not an impression.\n- If a change would go over a limit, stop and report the measured size.\n  Raising a limit is my decision. Don't quietly lower quality to stay under it.\n- Load code only where it's used. A page that doesn't need a feature shouldn't\n  download it.",
       "Rules in the browser": "- When you suggest a library or an asset, mention its size and whether\n  something lighter would do.\n- Suggest measuring before and after for changes that add code to a page."
     }
   },

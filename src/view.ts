@@ -20,7 +20,7 @@ type SegmentKey = "target" | "security" | "process" | "audience";
 interface SegmentOption { readonly value: string; readonly label: string; readonly detail: string }
 
 const SEGMENTS: ReadonlyArray<{ key: SegmentKey; label: string; question: string; options: readonly SegmentOption[] }> = [
-  { key: "target", label: "Where", question: "Where will you start the session?", options: [
+  { key: "target", label: "Used in", question: "Where will you start the session?", options: [
     { value: "code", label: "Claude Code", detail: "Claude Code, in your terminal or editor." },
     { value: "browser", label: "Browser", detail: "claude.ai in your browser. Rules about git and your computer are left out." },
   ] },
@@ -28,11 +28,11 @@ const SEGMENTS: ReadonlyArray<{ key: SegmentKey; label: string; question: string
     { value: "standard", label: "Standard", detail: "Ask before adding packages. Keep secrets out of code." },
     { value: "strict", label: "Strict", detail: "Approved packages only, automatic dependency checks, secrets in a secret store, nothing outside the project folder." },
   ] },
-  { key: "process", label: "Structure", question: "How much structure should Claude follow?", options: [
+  { key: "process", label: "Process", question: "How much structure should Claude follow?", options: [
     { value: "light", label: "Light", detail: "Plan first, then ask before risky steps." },
     { value: "thorough", label: "Thorough", detail: "A ticket for every change, proof that tests pass, a decision log and naming rules." },
   ] },
-  { key: "audience", label: "Users", question: "Who will use what you're building?", options: [
+  { key: "audience", label: "Used by", question: "Who will use what you're building?", options: [
     { value: "just-me", label: "Only me", detail: "Only you will use the result." },
     { value: "other-people", label: "Others too", detail: "Other people will use the result. Adds testing, and accessibility and size limits if it has an interface." },
   ] },
@@ -51,7 +51,7 @@ const FACTS: ReadonlyArray<{ key: BooleanAnswer; label: string; isAsked: (a: Ans
   { key: "hasTests", label: "Has, or should have, automated tests",
     isAsked: (a) => a.process !== "thorough" && a.audience !== "other-people" },
   { key: "isPublicRepo", label: "The repository is public", isAsked: () => true },
-  { key: "hasInterface", label: "Has an interface people use", isAsked: () => true },
+  { key: "hasInterface", label: "Has a user interface (website, app or screens)", isAsked: () => true },
   { key: "handlesUserData", label: "Handles data about its users", isAsked: () => true },
   { key: "promisesNoTracking", label: "Promises users they aren't tracked", isAsked: (a) => a.handlesUserData },
   { key: "isDeployed", label: "Gets deployed, or runs on a server", isAsked: () => true },
@@ -69,7 +69,7 @@ const PROJECT_FIELDS: ReadonlyArray<{ key: keyof ProjectDescription; label: stri
 ];
 
 const VARIANT_LABELS: Readonly<Record<string, string>> = {
-  "ask-first": "ask first", strict: "approved only", "with-permission": "asks first", main: "to main",
+  "ask-first": "ask first", strict: "approved packages only", "with-permission": "asks first", main: "straight to main",
   "pull-requests": "pull requests", "hands-off": "you handle it", standard: "standard", "strict-gate": "proof required",
   light: "light", full: "full tickets", "privacy-first": "privacy-first",
 };
@@ -87,7 +87,7 @@ const STYLE_TEXT = `
 @container (min-width: 600px) { .cssk-grid { grid-template-columns: minmax(0, 1fr) 220px; }
   .cssk-side { border-top: 0 !important; border-left: 1px solid var(--color-border); }
   .cssk-side-inner { position: sticky; top: calc(var(--sticky-header-height, 0px) + 12px);
-    max-height: calc(100vh - var(--sticky-header-height, 0px) - 24px); overflow-y: auto; } }
+    max-height: calc(100vh - var(--sticky-header-height, 0px) - 24px); overflow-y: auto; overflow-x: hidden; } }
 .cssk-main { padding: 4px 14px 14px; min-width: 0; }
 .cssk-side { padding: 12px 14px; border-top: 1px solid var(--color-border); min-width: 0; }
 .cssk-side-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -183,7 +183,7 @@ const STYLE_TEXT = `
 .cssk details[open]::details-content { height: auto; }
 @keyframes cssk-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .cssk details[open] .cssk-advanced-body { animation: cssk-reveal 240ms ease-out; }
-@keyframes cssk-enter { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
+@keyframes cssk-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 .cssk-list li.cssk-enter { animation: cssk-enter 220ms ease-out; }
 @keyframes cssk-changed { from { color: var(--color-accent); } }
 .cssk-list li span.cssk-changed { animation: cssk-changed 700ms ease-out; }
@@ -230,7 +230,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   const mainColumn = element("div", { class: "cssk-main" });
   const sideColumn = element("div", { class: "cssk-side" });
   ticket.append(
-    element("div", { class: "cssk-bar" }, [element("span", {}, ["New session"]), element("span", {}, [barCount])]),
+    element("div", { class: "cssk-bar" }, [element("span", {}, ["Starting prompt builder"]), element("span", {}, [barCount])]),
     element("div", { class: "cssk-grid" }, [mainColumn, sideColumn]),
   );
   container.append(ticket);
@@ -311,7 +311,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   }
   mainColumn.append(element("fieldset", {}, [
     element("legend", {}, [element("span", { class: "cssk-label" },
-      ["Describe it (optional; empty fields become [placeholders])"])]), fields]));
+      ["Describe the project (optional; anything left empty becomes a [placeholder] to fill in later)"])]), fields]));
 
   // Advanced: every rule set, adjustable by hand. Collapsed by default.
   const advancedCount = element("small");
@@ -354,9 +354,19 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
     moduleControls.set(moduleData.id, { box, checkbox, select });
     advancedBody.append(box);
   }
-  const resetButton = element("button", { type: "button" }, ["Reset to my answers"]);
-  resetButton.addEventListener("click", () => { overrides = {}; update(); }, { signal });
-  advancedBody.append(element("div", { class: "cssk-actions" }, [resetButton]));
+  const resetHelpId = `${idPrefix}-reset-help`;
+  const resetButton = element("button", { type: "button", "aria-describedby": resetHelpId },
+    ["Undo all changes made in Advanced settings"]);
+  resetButton.addEventListener("click", () => {
+    overrides = {};
+    update();
+    status.textContent = "Advanced settings are back to what your answers chose.";
+  }, { signal });
+  advancedBody.append(
+    element("div", { class: "cssk-actions" }, [resetButton]),
+    element("p", { class: "cssk-detail", id: resetHelpId }, [
+      "Every rule set goes back to what your answers above chose. Your answers and project description stay as they are."]),
+  );
   mainColumn.append(advanced);
 
   // The summary column: what is in the prompt right now, and the actions.
@@ -364,8 +374,8 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   const warnings = element("div");
   const copyButton = element("button", { type: "button", class: "cssk-primary" }, ["Copy"]);
   const downloadButton = element("button", { type: "button" }, ["Download"]);
-  // "Change" opens Advanced settings and moves focus there, for people who look at the summary first.
-  const changeButton = element("button", { type: "button", "aria-controls": advanced.id }, ["Change"]);
+  // "Edit" opens Advanced settings and moves focus there, for people who look at the summary first.
+  const changeButton = element("button", { type: "button", "aria-controls": advanced.id }, ["Edit"]);
   changeButton.addEventListener("click", () => {
     advanced.open = true;
     advancedSummary.focus();
@@ -482,7 +492,6 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       controls.checkbox.checked = choice !== undefined;
       if (controls.select) {
         controls.select.value = choice?.variant ?? overrides[moduleData.id]?.variant ?? moduleData.variants[0] ?? "";
-        controls.select.disabled = choice === undefined;
       }
     }
     leadInput.checked = choices.some((choice) => choice.id === "user-leads");
