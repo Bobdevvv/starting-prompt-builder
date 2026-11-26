@@ -1,16 +1,17 @@
-# Results: does the kickoff prompt stop Claude from building before agreeing a plan?
+# Results: does the starting prompt stop Claude from building before agreeing a plan?
 
 Protocol: `research/protocol.md`, fixed before the first run, with one amendment
 (A1, §8) made after run 2 and before any further run. Every run is listed in
 `research/runs/results.csv`. Each run's tool calls and final reply are in
-`research/runs/logs/`.
+`research/runs/logs/`. The protocol calls the starting prompt the "kickoff prompt", its
+earlier name.
 
 ## The result
 
 | arm | violations | rate | 95% interval (Wilson) |
 |---|---|---|---|
 | A, task only | **10 of 10** | 100% | 72.2% to 100% |
-| C, kit kickoff prompt | **0 of 10** | 0% | 0% to 27.8% |
+| C, the kit's starting prompt | **0 of 10** | 0% | 0% to 27.8% |
 
 **One-sided Fisher exact test: p = 5.4 × 10⁻⁶** (α = 0.05). That is the most
 extreme split 10 runs per arm can produce.
@@ -24,13 +25,13 @@ first reply with questions and a proposed first step, and waited.
 ## What this shows, and what it doesn't
 
 **It shows:** for this task and this model (`claude-sonnet-5-5` in Claude Code
-2.1.332), starting with the kit's kickoff prompt reliably changed the first
+2.1.332), using the kit's starting prompt reliably changed the first
 thing Claude did, from building to asking. The data in the task was ambiguous
 on purpose: mixed date formats, decimal commas, unexplained status codes. A
 session that starts building has to guess those, without saying so.
 
 **It doesn't show:**
-- That the kit beats a one-line instruction. The kickoff prompt says plainly
+- That the kit beats a one-line instruction. The starting prompt says plainly
   "Don't change anything yet", and a single sentence might do the same. That
   comparison wasn't part of this test (owner's decision, `docs/decisions.md`
   D7).

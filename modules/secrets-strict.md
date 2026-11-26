@@ -1,11 +1,11 @@
 ---
 id: secrets-strict
-title: Secrets, strict
+title: Stricter secret handling
 question: Does it handle credentials, keys or anything an attacker would want? (switched on by strict security)
 targets: code, browser
 ---
 
-# Secrets, strict
+# Stricter secret handling
 
 **Prevents:**
 - secrets sitting readable on a server;

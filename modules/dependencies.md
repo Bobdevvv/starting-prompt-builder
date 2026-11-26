@@ -16,20 +16,20 @@ variants: ask-first, strict
 
 ## Rules: ask-first
 
-- Ask before adding a dependency. Name the package and the exact version, say
-  what it's for and what writing it ourselves would take, and wait for my
-  answer.
+- Ask before adding a dependency. Name the package and the exact version,
+  explain what it's for and how much work it would be to write it ourselves,
+  and wait for my answer.
 - Prefer the standard library and what the project already uses.
-- Pin exact versions (no `^` or `~` ranges), and keep lockfile changes to what
-  the approved addition needs.
-- Don't upgrade, replace or remove existing dependencies as a side effect of
-  another task. Suggest it separately.
+- Pin exact versions (no `^` or `~` ranges). Change the lockfile only as much
+  as the approved package requires.
+- Don't upgrade, replace or remove existing dependencies as part of another
+  task. Suggest it as a separate change.
 
 ## Rules: strict
 
-- The dependencies already in the project are the approved list. Treat
-  anything else as a proposal, never an install. Writing a small amount of code
-  ourselves is the default answer.
+- The dependencies already in the project are the approved list. Anything else
+  is only a proposal: never install it yourself. By default, we write a small
+  amount of code ourselves instead.
 - When you propose a package, check it first and report what you found:
   - its install scripts;
   - any obfuscated or minified source;
@@ -45,22 +45,23 @@ variants: ask-first, strict
   included, before committing.
 - Install scripts stay disabled (for npm, `ignore-scripts=true` in `.npmrc`).
   Letting one package run them (for npm, through its `allow-scripts` list)
-  needs a stated reason and my sign-off.
-- Don't upgrade, replace or remove existing dependencies as a side effect of
-  another task. Suggest it separately.
+  needs a stated reason and my approval.
+- Don't upgrade, replace or remove existing dependencies as part of another
+  task. Suggest it as a separate change.
 
 ## Rules in the browser: ask-first
 
-- Before code that needs a package, name it and say why. If a version without
-  it would be reasonably short, offer that too.
+- Before writing code that needs a package, name the package and explain why
+  it's needed. If the code would be reasonably short without it, offer that
+  version too.
 - Give install commands with exact versions.
 - Prefer the standard library and what I've told you the project already uses.
 
 ## Rules in the browser: strict
 
-- Write it without new packages by default. If a package is truly needed, name
-  it, say why, and list what I should check before installing: install scripts,
-  maintainers, age, advisories.
+- By default, write code without new packages. If a package is truly needed,
+  name it, explain why, and list what I should check before installing it:
+  install scripts, maintainers, age and known advisories.
 - Give install commands with exact versions, with install scripts disabled.
 
 ## Why these rules

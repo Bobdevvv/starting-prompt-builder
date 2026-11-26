@@ -1,4 +1,4 @@
-// Assembles a kickoff prompt from modules/ and a profile, so samples and the
+// Assembles a starting prompt from modules/ and a profile, so samples and the
 // test's arm C come straight from the module files instead of being copied by
 // hand. The builder's engine will do the same in TypeScript; this is the
 // reference it must match.

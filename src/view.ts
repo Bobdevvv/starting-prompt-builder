@@ -231,7 +231,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
 
   // Output.
   container.append(element("h3", {}, ["5. Your prompt"]));
-  const promptButton = element("button", { type: "button", "aria-pressed": "true" }, ["Kickoff prompt"]);
+  const promptButton = element("button", { type: "button", "aria-pressed": "true" }, ["Starting prompt"]);
   const claudeMdButton = element("button", { type: "button", "aria-pressed": "false" }, ["CLAUDE.md"]);
   const sizeText = element("span", { class: "cssk-size" });
   const outputId = `${idPrefix}-output`;
@@ -270,7 +270,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   downloadButton.addEventListener("click", () => {
     const url = URL.createObjectURL(new Blob([output.value], { type: "text/markdown;charset=utf-8" }));
     pendingDownloadUrls.add(url);
-    const link = element("a", { href: url, download: outputKind === "claude-md" ? "CLAUDE.md" : "kickoff-prompt.md" });
+    const link = element("a", { href: url, download: outputKind === "claude-md" ? "CLAUDE.md" : "starting-prompt.md" });
     link.click();
     const timer = window.setTimeout(() => {
       URL.revokeObjectURL(url);
@@ -278,7 +278,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       pendingTimers.delete(timer);
     }, 0);
     pendingTimers.add(timer);
-    status.textContent = outputKind === "claude-md" ? "Downloaded CLAUDE.md." : "Downloaded kickoff-prompt.md.";
+    status.textContent = outputKind === "claude-md" ? "Downloaded CLAUDE.md." : "Downloaded starting-prompt.md.";
   }, { signal });
 
   function update(): void {

@@ -6,15 +6,16 @@ targets: code, browser
 
 # Frame
 
-The kickoff prompt is: **Opening**, then each chosen module's rules under its
+The starting prompt is: **Opening**, then each chosen module's rules under its
 title as a `##` heading (the core's title is "How we work"), then
 **The project**, then **Your first reply**. Text in `{braces}` is filled in by
 the builder.
 
 ## Opening
 
-I'm starting work on a project with you. First, how I'd like us to work. Then
-the project, and what I'd like from your first reply.
+I'm starting work on a project with you. Below are the rules I'd like us to
+work by, a short description of the project, and what I'd like in your first
+reply.
 
 ## The project
 
@@ -30,7 +31,7 @@ Don't change anything yet. In your first reply:
 - list anything that's unclear;
 - propose the first step.
 
-Then wait for my go-ahead.
+Then wait for my approval.
 
 If this project has no `CLAUDE.md`, offer to create one from this message:
 every rules section above "The project", word for word, followed by a short
@@ -46,7 +47,7 @@ Don't write any code yet. In your first reply:
 - list anything that's unclear;
 - propose the first step.
 
-Then wait for my go-ahead.
+Then wait for my approval.
 
 ## Why
 

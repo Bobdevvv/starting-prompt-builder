@@ -31,8 +31,8 @@ export const MODULES: readonly ModuleData[] = [
     "variants": [],
     "prevents": "building the wrong thing from a guessed reading of the request; doing something that can't be undone without warning; secrets ending up in code, history or chat; \"done\" claims that nobody checked.",
     "rules": {
-      "Rules": "- Before any change bigger than a few small edits, tell me what you'll change\n  and why, then wait for my go-ahead. An approved plan covers only what it\n  described, so ask again if the work grows past it.\n- If a request can be read two ways, or would make you guess something that\n  matters, ask. When you do assume something, say it in one line where I'll see\n  it.\n- Ask before anything that is hard to undo or that reaches beyond this machine:\n  deleting or overwriting files you didn't create in this session, discarding\n  uncommitted changes, rewriting git history, pushing, publishing, sending, or\n  changing system settings. Say what will happen and whether it can be undone.\n- Keep secrets (API keys, passwords, tokens, private keys) out of code, commit\n  messages, logs and your replies. Read them from environment variables or a\n  secret store. If you find one already in the code, tell me instead of moving\n  it.\n- \"Done\" means checked: you ran it, the tests or the build, and saw it work. If\n  you couldn't check something, say so plainly.\n- When you finish, list the files you changed and anything you skipped or left\n  unfinished.\n- If one of these rules seems wrong for the situation, raise it with me. Don't\n  quietly work around it.",
-      "Rules in the browser": "- Before writing a large piece of code or a long document, outline what you'll\n  produce and check it with me.\n- If a request can be read two ways, or would make you guess something that\n  matters, ask. When you do assume something, say it in one line where I'll see\n  it.\n- When you suggest something that is hard to undo (deleting data,\n  force-pushing, dropping a table, publishing), mark it clearly, and give the\n  way to back up first.\n- Don't ask me for secrets. If I paste one, point it out, and use a placeholder\n  such as `YOUR_API_KEY` in anything you write.\n- You can't run code here, so say what you haven't tested and how I can check\n  it quickly.\n- If you're not sure about an API, a version or a flag, say so instead of\n  guessing.\n- If one of these rules seems wrong for the situation, raise it with me. Don't\n  quietly work around it."
+      "Rules": "- Before any change bigger than a few small edits, tell me what you'll change\n  and why, then wait for my approval. My approval covers only the plan you\n  described. If the work grows beyond it, ask again.\n- If a request can be read in more than one way, or would make you guess\n  something important, ask. If you do make an assumption, state it in one line\n  in your reply.\n- Ask before doing anything that is hard to undo or that affects anything\n  outside this computer: deleting or overwriting files you didn't create in\n  this session, discarding uncommitted changes, rewriting git history, pushing,\n  publishing, sending messages, or changing system settings. Tell me what will\n  happen and whether it can be undone.\n- Keep secrets (API keys, passwords, tokens, private keys) out of code, commit\n  messages, logs and your replies. Read them from environment variables or a\n  secret store. If you find a secret already in the code, tell me. Don't move\n  it somewhere else.\n- Only call something done after you have checked it: run the code, the tests\n  or the build, and see it work. If you couldn't check something, say so\n  clearly.\n- When you finish, list the files you changed, and anything you skipped or\n  left unfinished.\n- If one of these rules seems wrong for the situation, tell me. Don't quietly\n  work around it.",
+      "Rules in the browser": "- Before writing a large piece of code or a long document, give me an outline\n  and wait for my approval.\n- If a request can be read in more than one way, or would make you guess\n  something important, ask. If you do make an assumption, state it in one line\n  in your reply.\n- When you suggest something that is hard to undo (deleting data,\n  force-pushing, dropping a table, publishing), mark it clearly, and explain\n  how to make a backup first.\n- Don't ask me for secrets. If I paste one, point it out, and use a placeholder\n  such as `YOUR_API_KEY` in anything you write.\n- You can't run code here, so say what you haven't tested and how I can check\n  it quickly.\n- If you're not sure about an API, a version or a flag, say so instead of\n  guessing.\n- If one of these rules seems wrong for the situation, tell me. Don't quietly\n  work around it."
     }
   },
   {
@@ -49,15 +49,15 @@ export const MODULES: readonly ModuleData[] = [
     ],
     "prevents": "packages added for something a few lines could do; packages nobody checked (typosquats, abandoned projects, hijacked maintainer accounts, install scripts); versions drifting without anyone deciding it.",
     "rules": {
-      "Rules: ask-first": "- Ask before adding a dependency. Name the package and the exact version, say\n  what it's for and what writing it ourselves would take, and wait for my\n  answer.\n- Prefer the standard library and what the project already uses.\n- Pin exact versions (no `^` or `~` ranges), and keep lockfile changes to what\n  the approved addition needs.\n- Don't upgrade, replace or remove existing dependencies as a side effect of\n  another task. Suggest it separately.",
-      "Rules: strict": "- The dependencies already in the project are the approved list. Treat\n  anything else as a proposal, never an install. Writing a small amount of code\n  ourselves is the default answer.\n- When you propose a package, check it first and report what you found:\n  - its install scripts;\n  - any obfuscated or minified source;\n  - a recent change of owner or maintainer;\n  - its age, number of maintainers and download count;\n  - known advisories (`npm audit`, OSV or the ecosystem's equivalent).\n\n  Then wait for my decision.\n- Once I approve one, log it in `docs/dependencies.md`: the package, the exact\n  version, why it was added, the check result, and whether it runs install\n  scripts.\n- Pin exact versions, and read the whole lockfile diff, transitive packages\n  included, before committing.\n- Install scripts stay disabled (for npm, `ignore-scripts=true` in `.npmrc`).\n  Letting one package run them (for npm, through its `allow-scripts` list)\n  needs a stated reason and my sign-off.\n- Don't upgrade, replace or remove existing dependencies as a side effect of\n  another task. Suggest it separately.",
-      "Rules in the browser: ask-first": "- Before code that needs a package, name it and say why. If a version without\n  it would be reasonably short, offer that too.\n- Give install commands with exact versions.\n- Prefer the standard library and what I've told you the project already uses.",
-      "Rules in the browser: strict": "- Write it without new packages by default. If a package is truly needed, name\n  it, say why, and list what I should check before installing: install scripts,\n  maintainers, age, advisories.\n- Give install commands with exact versions, with install scripts disabled."
+      "Rules: ask-first": "- Ask before adding a dependency. Name the package and the exact version,\n  explain what it's for and how much work it would be to write it ourselves,\n  and wait for my answer.\n- Prefer the standard library and what the project already uses.\n- Pin exact versions (no `^` or `~` ranges). Change the lockfile only as much\n  as the approved package requires.\n- Don't upgrade, replace or remove existing dependencies as part of another\n  task. Suggest it as a separate change.",
+      "Rules: strict": "- The dependencies already in the project are the approved list. Anything else\n  is only a proposal: never install it yourself. By default, we write a small\n  amount of code ourselves instead.\n- When you propose a package, check it first and report what you found:\n  - its install scripts;\n  - any obfuscated or minified source;\n  - a recent change of owner or maintainer;\n  - its age, number of maintainers and download count;\n  - known advisories (`npm audit`, OSV or the ecosystem's equivalent).\n\n  Then wait for my decision.\n- Once I approve one, log it in `docs/dependencies.md`: the package, the exact\n  version, why it was added, the check result, and whether it runs install\n  scripts.\n- Pin exact versions, and read the whole lockfile diff, transitive packages\n  included, before committing.\n- Install scripts stay disabled (for npm, `ignore-scripts=true` in `.npmrc`).\n  Letting one package run them (for npm, through its `allow-scripts` list)\n  needs a stated reason and my approval.\n- Don't upgrade, replace or remove existing dependencies as part of another\n  task. Suggest it as a separate change.",
+      "Rules in the browser: ask-first": "- Before writing code that needs a package, name the package and explain why\n  it's needed. If the code would be reasonably short without it, offer that\n  version too.\n- Give install commands with exact versions.\n- Prefer the standard library and what I've told you the project already uses.",
+      "Rules in the browser: strict": "- By default, write code without new packages. If a package is truly needed,\n  name it, explain why, and list what I should check before installing it:\n  install scripts, maintainers, age and known advisories.\n- Give install commands with exact versions, with install scripts disabled."
     }
   },
   {
     "id": "supply-chain",
-    "title": "Supply-chain checks in CI",
+    "title": "Dependency checks in CI",
     "question": "Should dependencies be checked automatically, not only when they're added? (switched on by strict security)",
     "targets": [
       "code",
@@ -72,7 +72,7 @@ export const MODULES: readonly ModuleData[] = [
   },
   {
     "id": "secrets-strict",
-    "title": "Secrets, strict",
+    "title": "Stricter secret handling",
     "question": "Does it handle credentials, keys or anything an attacker would want? (switched on by strict security)",
     "targets": [
       "code",
@@ -87,7 +87,7 @@ export const MODULES: readonly ModuleData[] = [
   },
   {
     "id": "local-machine",
-    "title": "My own machine",
+    "title": "This computer",
     "question": "Should Claude be extra careful with your computer itself, beyond the project folder? (switched on by strict security)",
     "targets": [
       "code"
@@ -100,7 +100,7 @@ export const MODULES: readonly ModuleData[] = [
   },
   {
     "id": "git-workflow",
-    "title": "How changes land",
+    "title": "Git",
     "question": "How should git work? Claude runs it but asks before commits and pushes, straight to main, through pull requests, or you handle git yourself?",
     "targets": [
       "code"
@@ -113,8 +113,8 @@ export const MODULES: readonly ModuleData[] = [
     ],
     "prevents": "commits landing where you didn't want them; history rewritten under you; pushes you didn't ask for.",
     "rules": {
-      "Rules: with-permission": "- Run git yourself. Commands that only read (status, diff, log, show) are\n  always fine.\n- Commit, push, merge, rebase, reset, stash, check out over changes, delete\n  branches or tags, or change remotes only when I've explicitly given\n  permission for that action. Until then, say what you'd run and why, and wait.\n- Permission covers what I named and nothing more. Permission to commit isn't\n  permission to push.\n- Never force-push, and never rewrite commits that have been pushed.\n- Commit messages say why, not only what.",
-      "Rules: main": "- Commit to main in small commits, each one leaving the project working.\n- Commit when a step we agreed on is done, or when I ask. Push only when I ask.\n- Never force-push, and never rewrite commits that have been pushed.\n- Commit messages say why, not only what.",
+      "Rules: with-permission": "- You may run git yourself. Commands that only read (status, diff, log, show)\n  are always allowed.\n- Only commit, push, merge, rebase, reset, stash, delete branches or tags,\n  change remotes, or switch branches in a way that discards changes when I\n  have explicitly given you permission for that action. Until then, tell me\n  what you would run and why, and wait.\n- Permission covers only the action I named. Permission to commit is not\n  permission to push.\n- Never force-push, and never rewrite commits that have been pushed.\n- In commit messages, explain why a change was made, not only what changed.",
+      "Rules: main": "- Commit to main in small commits, each one leaving the project working.\n- Commit when a step we agreed on is done, or when I ask. Push only when I ask.\n- Never force-push, and never rewrite commits that have been pushed.\n- In commit messages, explain why a change was made, not only what changed.",
       "Rules: pull-requests": "- Never commit to main. Start a branch for each piece of work, named after it.\n- Open one pull request per change. Its description says what changed and why,\n  and how it was tested.\n- Never merge. I review and merge.\n- Never force-push a branch someone else may have pulled.",
       "Rules: hands-off": "- Don't run git commands that change anything (commit, branch, stash, reset,\n  checkout of files, push). I handle git.\n- Reading is fine: status, diff and log."
     }
@@ -133,7 +133,7 @@ export const MODULES: readonly ModuleData[] = [
     ],
     "prevents": "\"it works\" with no evidence; tests bent until they pass; old failures blamed on new work.",
     "rules": {
-      "Rules: standard": "- New behaviour comes with tests. A bug fix starts with a test that fails\n  because of the bug.\n- Before calling a task done, run the full test suite and show the command and\n  the result.\n- Never weaken, skip or delete a test to make it pass. If a test looks wrong,\n  tell me why and let me decide.\n- If tests were already failing before you started, say so first.",
+      "Rules: standard": "- Add tests for new behaviour. When fixing a bug, first write a test that\n  fails because of the bug.\n- Before calling a task done, run the full test suite and show the command and\n  the result.\n- Never weaken, skip or delete a test to make it pass. If a test looks wrong,\n  tell me why and let me decide.\n- If tests were already failing before you started, say so first.",
       "Rules: strict-gate": "- New logic gets unit tests. New endpoints get tests for the happy path, error\n  cases, and malformed or malicious input.\n- Nothing is done with failing tests, skipped tests, or a \"tests to be added\n  later\" note. If a test truly can't be written, explain why in detail. That's\n  a rare exception for me to review, not a default.\n- Before calling anything done, run the full suite and show:\n  - the command;\n  - the pass and fail counts;\n  - a checklist of anything tested by hand.\n- Check exit codes, not only printed output. Piping a test run into another\n  command can hide a failure.\n- Verify the built output, the thing that ships, not only the development\n  server.\n- My asking you to finish is not permission to skip any of this. If testing is\n  incomplete, say exactly what's missing.\n- Never weaken, skip or delete a test to make it pass. Work that's reopened\n  after being called done goes through all of this again.",
       "Rules in the browser: standard": "- Include tests with the code you write, and say which cases they cover and\n  which they don't.\n- If I paste a failing test, fix the code, not the test, unless you explain why\n  the test is wrong.",
       "Rules in the browser: strict-gate": "- Include tests with the code you write, including error cases and malformed\n  input, and list the cases that aren't covered.\n- If I paste a failing test, fix the code, not the test, unless you explain why\n  the test is wrong.\n- Don't call code finished until I've confirmed the tests pass."
@@ -141,7 +141,7 @@ export const MODULES: readonly ModuleData[] = [
   },
   {
     "id": "work-log",
-    "title": "Work log across sessions",
+    "title": "Work log",
     "question": "Will you work on it across many sessions?",
     "targets": [
       "code"
@@ -153,7 +153,7 @@ export const MODULES: readonly ModuleData[] = [
     "prevents": "each new session starting from zero; a change breaking something earlier work relied on; settled decisions being argued again.",
     "rules": {
       "Rules: light": "- Keep one Markdown file per piece of work in `tickets/`, with the goal, the\n  plan, the status, and the evidence that it was tested.\n- Before starting, search `tickets/` for related work and list what this change\n  might affect.\n- Record decisions and their reasons in `docs/decisions.md`, and read it before\n  proposing something it already settled.\n- At the end of a session, update the ticket with what's done and what's next.",
-      "Rules: full": "- Every change belongs to a ticket in `tickets/`. If there isn't one, write it\n  first, then stop and wait for my go-ahead before implementing it. A ticket\n  written and built in the same turn gives me no chance to weigh in.\n- A ticket holds:\n  - the goal;\n  - an impact analysis: related tickets, and what this might affect,\n    functionally and technically;\n  - the testing evidence;\n  - an impact log;\n  - closing notes: known limitations, what not to change without re-reading\n    related work, and what was deferred.\n- Write the impact analysis before any code. After the change, add a dated\n  entry to the impact log of every ticket it affected.\n- At the start of a session, read the ticket index and the ticket you're\n  working on. Then say which files you read, and which you skipped and why.\n- Significant decisions get an entry in `docs/decisions.md` with their context,\n  the alternatives considered and the consequences. Don't reopen one without\n  saying so.\n- If something important lives only in our chat, write it down before the\n  session ends."
+      "Rules: full": "- Every change belongs to a ticket in `tickets/`. If there isn't one, write it\n  first, then stop and wait for my approval before implementing it. A ticket\n  written and built in the same turn gives me no chance to weigh in.\n- A ticket holds:\n  - the goal;\n  - an impact analysis: related tickets, and what this might affect,\n    functionally and technically;\n  - the testing evidence;\n  - an impact log;\n  - closing notes: known limitations, what not to change without re-reading\n    related work, and what was deferred.\n- Write the impact analysis before any code. After the change, add a dated\n  entry to the impact log of every ticket it affected.\n- At the start of a session, read the ticket index and the ticket you're\n  working on. Then say which files you read, and which you skipped and why.\n- Significant decisions get an entry in `docs/decisions.md` with their context,\n  the alternatives considered and the consequences. Don't reopen one without\n  saying so.\n- If something important lives only in our chat, write it down before the\n  session ends."
     }
   },
   {
@@ -229,7 +229,7 @@ export const MODULES: readonly ModuleData[] = [
     "variants": [],
     "prevents": "untested changes reaching production; hand-made changes on a server that nobody can repeat; migrations that can't be undone; access widened by accident.",
     "rules": {
-      "Rules": "- Never deploy, run migrations against, or change a live environment unless I\n  ask for that specific action in this session.\n- Deploy only through the pipeline, never by hand. CI tests what gets deployed,\n  and a smoke test checks the live result afterwards.\n- Before a deploy, show what's going out (the commits, or a summary of the\n  diff) and how we'd roll it back.\n- Database migrations must be reversible. If one can't be, say so before\n  running it, and suggest a backup.\n- Server and infrastructure config lives in files in the repo, and the deployed\n  copy should match them. Report any difference instead of fixing the server by\n  hand.\n- Changes to who or what can reach the system (keys, permissions, firewall\n  rules) are separate, reviewed changes. They never ride along with a routine\n  deploy.\n- Services run as unprivileged users with only the access they need.\n- While debugging, never print environment values, connection strings or\n  tokens.",
+      "Rules": "- Never deploy, run migrations against, or change a live environment unless I\n  ask for that specific action in this session.\n- Deploy only through the pipeline, never by hand. CI tests what gets deployed,\n  and a smoke test checks the live result afterwards.\n- Before a deploy, show what's going out (the commits, or a summary of the\n  diff) and how we'd roll it back.\n- Database migrations must be reversible. If one can't be, say so before\n  running it, and suggest a backup.\n- Server and infrastructure config lives in files in the repo, and the deployed\n  copy should match them. Report any difference instead of fixing the server by\n  hand.\n- Changes to who or what can reach the system (keys, permissions, firewall\n  rules) are separate, reviewed changes. They are never part of a routine\n  deploy.\n- Services run as unprivileged users with only the access they need.\n- While debugging, never print environment values, connection strings or\n  tokens.",
       "Rules in the browser": "- When you give deploy or server instructions, include the rollback step, and\n  mark any command that can't be undone.\n- Don't ask me to paste server config or environment values. Ask for their\n  names, not their values."
     }
   },
@@ -264,7 +264,7 @@ export const MODULES: readonly ModuleData[] = [
   },
   {
     "id": "writing",
-    "title": "Writing for people",
+    "title": "Writing",
     "question": "Will it have text that people read, such as docs, interface copy or posts?",
     "targets": [
       "code",
@@ -279,8 +279,8 @@ export const MODULES: readonly ModuleData[] = [
 ];
 
 export const FRAME: FrameData = {
-  "opening": "I'm starting work on a project with you. First, how I'd like us to work. Then\nthe project, and what I'd like from your first reply.",
+  "opening": "I'm starting work on a project with you. Below are the rules I'd like us to\nwork by, a short description of the project, and what I'd like in your first\nreply.",
   "project": "- **What it is:** {what it is}\n- **Built with:** {stack}\n- **Where it stands:** {where it stands}\n- **This session's goal:** {goal}",
-  "firstReplyCode": "Don't change anything yet. In your first reply:\n- summarise the project and this session's goal in your own words;\n- list anything that's unclear;\n- propose the first step.\n\nThen wait for my go-ahead.\n\nIf this project has no `CLAUDE.md`, offer to create one from this message:\nevery rules section above \"The project\", word for word, followed by a short\ndescription of the project. Don't summarise, shorten or drop any rule. If a\n`CLAUDE.md` already exists, offer to add the rules it doesn't have yet, without\nchanging what's there. That way the rules survive when a long session is\ncompacted, and later sessions start with them too.",
-  "firstReplyBrowser": "Don't write any code yet. In your first reply:\n- summarise the project and this session's goal in your own words;\n- list anything that's unclear;\n- propose the first step.\n\nThen wait for my go-ahead."
+  "firstReplyCode": "Don't change anything yet. In your first reply:\n- summarise the project and this session's goal in your own words;\n- list anything that's unclear;\n- propose the first step.\n\nThen wait for my approval.\n\nIf this project has no `CLAUDE.md`, offer to create one from this message:\nevery rules section above \"The project\", word for word, followed by a short\ndescription of the project. Don't summarise, shorten or drop any rule. If a\n`CLAUDE.md` already exists, offer to add the rules it doesn't have yet, without\nchanging what's there. That way the rules survive when a long session is\ncompacted, and later sessions start with them too.",
+  "firstReplyBrowser": "Don't write any code yet. In your first reply:\n- summarise the project and this session's goal in your own words;\n- list anything that's unclear;\n- propose the first step.\n\nThen wait for my approval."
 };

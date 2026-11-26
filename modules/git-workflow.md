@@ -1,13 +1,13 @@
 ---
 id: git-workflow
-title: How changes land
+title: Git
 question: How should git work? Claude runs it but asks before commits and pushes, straight to main, through pull requests, or you handle git yourself?
 targets: code
 variants: with-permission, main, pull-requests, hands-off
 conflicts: deploy-ops with the main variant shows a warning (changes deploy without review)
 ---
 
-# How changes land
+# Git
 
 **Prevents:**
 - commits landing where you didn't want them;
@@ -16,22 +16,23 @@ conflicts: deploy-ops with the main variant shows a warning (changes deploy with
 
 ## Rules: with-permission
 
-- Run git yourself. Commands that only read (status, diff, log, show) are
-  always fine.
-- Commit, push, merge, rebase, reset, stash, check out over changes, delete
-  branches or tags, or change remotes only when I've explicitly given
-  permission for that action. Until then, say what you'd run and why, and wait.
-- Permission covers what I named and nothing more. Permission to commit isn't
+- You may run git yourself. Commands that only read (status, diff, log, show)
+  are always allowed.
+- Only commit, push, merge, rebase, reset, stash, delete branches or tags,
+  change remotes, or switch branches in a way that discards changes when I
+  have explicitly given you permission for that action. Until then, tell me
+  what you would run and why, and wait.
+- Permission covers only the action I named. Permission to commit is not
   permission to push.
 - Never force-push, and never rewrite commits that have been pushed.
-- Commit messages say why, not only what.
+- In commit messages, explain why a change was made, not only what changed.
 
 ## Rules: main
 
 - Commit to main in small commits, each one leaving the project working.
 - Commit when a step we agreed on is done, or when I ask. Push only when I ask.
 - Never force-push, and never rewrite commits that have been pushed.
-- Commit messages say why, not only what.
+- In commit messages, explain why a change was made, not only what changed.
 
 ## Rules: pull-requests
 
@@ -71,4 +72,4 @@ fine choice, but it should be a deliberate one.
 **Script:**
 - with-permission and hands-off: did a git command that changes things run
   without permission?
-- pull-requests: did a commit land on main?
+- pull-requests: did a commit end up on main?

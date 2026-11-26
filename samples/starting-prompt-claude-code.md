@@ -1,41 +1,44 @@
-I'm starting work on a project with you. First, how I'd like us to work. Then
-the project, and what I'd like from your first reply.
+I'm starting work on a project with you. Below are the rules I'd like us to
+work by, a short description of the project, and what I'd like in your first
+reply.
 
 ## How we work
 
 - Before any change bigger than a few small edits, tell me what you'll change
-  and why, then wait for my go-ahead. An approved plan covers only what it
-  described, so ask again if the work grows past it.
-- If a request can be read two ways, or would make you guess something that
-  matters, ask. When you do assume something, say it in one line where I'll see
-  it.
-- Ask before anything that is hard to undo or that reaches beyond this machine:
-  deleting or overwriting files you didn't create in this session, discarding
-  uncommitted changes, rewriting git history, pushing, publishing, sending, or
-  changing system settings. Say what will happen and whether it can be undone.
+  and why, then wait for my approval. My approval covers only the plan you
+  described. If the work grows beyond it, ask again.
+- If a request can be read in more than one way, or would make you guess
+  something important, ask. If you do make an assumption, state it in one line
+  in your reply.
+- Ask before doing anything that is hard to undo or that affects anything
+  outside this computer: deleting or overwriting files you didn't create in
+  this session, discarding uncommitted changes, rewriting git history, pushing,
+  publishing, sending messages, or changing system settings. Tell me what will
+  happen and whether it can be undone.
 - Keep secrets (API keys, passwords, tokens, private keys) out of code, commit
   messages, logs and your replies. Read them from environment variables or a
-  secret store. If you find one already in the code, tell me instead of moving
-  it.
-- "Done" means checked: you ran it, the tests or the build, and saw it work. If
-  you couldn't check something, say so plainly.
-- When you finish, list the files you changed and anything you skipped or left
-  unfinished.
-- If one of these rules seems wrong for the situation, raise it with me. Don't
-  quietly work around it.
+  secret store. If you find a secret already in the code, tell me. Don't move
+  it somewhere else.
+- Only call something done after you have checked it: run the code, the tests
+  or the build, and see it work. If you couldn't check something, say so
+  clearly.
+- When you finish, list the files you changed, and anything you skipped or
+  left unfinished.
+- If one of these rules seems wrong for the situation, tell me. Don't quietly
+  work around it.
 
 ## Dependencies
 
-- Ask before adding a dependency. Name the package and the exact version, say
-  what it's for and what writing it ourselves would take, and wait for my
-  answer.
+- Ask before adding a dependency. Name the package and the exact version,
+  explain what it's for and how much work it would be to write it ourselves,
+  and wait for my answer.
 - Prefer the standard library and what the project already uses.
-- Pin exact versions (no `^` or `~` ranges), and keep lockfile changes to what
-  the approved addition needs.
-- Don't upgrade, replace or remove existing dependencies as a side effect of
-  another task. Suggest it separately.
+- Pin exact versions (no `^` or `~` ranges). Change the lockfile only as much
+  as the approved package requires.
+- Don't upgrade, replace or remove existing dependencies as part of another
+  task. Suggest it as a separate change.
 
-## How changes land
+## Git
 
 - Never commit to main. Start a branch for each piece of work, named after it.
 - Open one pull request per change. Its description says what changed and why,
@@ -45,8 +48,8 @@ the project, and what I'd like from your first reply.
 
 ## Testing
 
-- New behaviour comes with tests. A bug fix starts with a test that fails
-  because of the bug.
+- Add tests for new behaviour. When fixing a bug, first write a test that
+  fails because of the bug.
 - Before calling a task done, run the full test suite and show the command and
   the result.
 - Never weaken, skip or delete a test to make it pass. If a test looks wrong,
@@ -115,7 +118,7 @@ Don't change anything yet. In your first reply:
 - list anything that's unclear;
 - propose the first step.
 
-Then wait for my go-ahead.
+Then wait for my approval.
 
 If this project has no `CLAUDE.md`, offer to create one from this message:
 every rules section above "The project", word for word, followed by a short

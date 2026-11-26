@@ -123,7 +123,7 @@ describe("assemblePrompt", () => {
 
   it("puts the opening first, then the rules, the project and the first reply", () => {
     const prompt = assemblePrompt("code", choices, EMPTY_PROJECT);
-    const order = ["I'm starting work", "## How we work", "## Dependencies", "## How changes land",
+    const order = ["I'm starting work", "## How we work", "## Dependencies", "## Git",
       "## The project", "## Your first reply"].map((text) => prompt.indexOf(text));
     expect(order.every((position, i) => position >= 0 && (i === 0 || position > (order[i - 1] ?? -1)))).toBe(true);
     expect(prompt.endsWith("\n")).toBe(true);

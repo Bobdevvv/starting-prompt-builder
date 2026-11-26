@@ -28,7 +28,7 @@ conflicts: git-workflow (main) shows a warning (changes deploy without review)
   copy should match them. Report any difference instead of fixing the server by
   hand.
 - Changes to who or what can reach the system (keys, permissions, firewall
-  rules) are separate, reviewed changes. They never ride along with a routine
+  rules) are separate, reviewed changes. They are never part of a routine
   deploy.
 - Services run as unprivileged users with only the access they need.
 - While debugging, never print environment values, connection strings or

@@ -61,37 +61,39 @@ Then these sections:
 
 ### Step 1: four quick questions
 
-These set most of the prompt at once.
+These decide most of the prompt.
 
-| question | answers | what it switches |
+| question | answers | what it changes |
 |---|---|---|
-| **Where will you use it?** | Claude Code / claude.ai | Which version of every rule is used. Modules for Claude Code only (`git-workflow`, `work-log`, `local-machine`) drop out in the browser. |
-| **How strict should security be?** | standard / strict | **strict:** `dependencies` → strict, plus `supply-chain`, `secrets-strict` and `local-machine` |
-| **How much process?** | light / thorough | **thorough:** `testing` → strict-gate, `work-log` → full, plus `code-clarity` |
-| **Who is it for?** | just me / other people | **other people:** `testing` on, plus `accessibility` if it has an interface and `budgets` if it runs in a browser |
+| **Where will you start the session?** | Claude Code / claude.ai in the browser | Which version of each rule is used. Modules that only apply to Claude Code (`git-workflow`, `work-log`, `local-machine`) are left out in the browser. |
+| **How strict should security be?** | Standard / Strict | **Strict:** `dependencies` becomes strict, and `supply-chain`, `secrets-strict` and `local-machine` are added. |
+| **How much structure should Claude follow?** | Light / Thorough | **Thorough:** `testing` becomes strict-gate, `work-log` becomes full, and `code-clarity` is added. |
+| **Who will use what you're building?** | Only me / Other people too | **Other people too:** `testing` is added, plus `accessibility` and `budgets` if it has an interface. This is about the people who use the result, not about who can see the code (that is the public-repository question). |
 
 ### Step 2: facts about the project
 
-These switch on single modules. Each is asked only if step 1 hasn't settled it.
+Each fact adds one module. A fact is only asked if step 1 hasn't already
+decided it.
 
 | question | module |
 |---|---|
-| Will it use third-party packages? | `dependencies` (variant set by security) |
-| How should git work? Claude runs it but asks before commits and pushes, straight to main, through pull requests, or you handle git yourself? | `git-workflow` (variant) |
-| Does it have, or should it have, automated tests? | `testing` (variant set by process) |
-| Is the repository public, or will it be? | `public-repo` |
-| Does it have an interface that people use? | `accessibility` |
-| Does it handle personal data, including IP addresses in logs? Is it built to promise no tracking? | `user-data` (privacy-first if yes to both) |
-| Does it get deployed, or run on a server? | `deploy-ops` |
-| Will you work on it across many sessions? | `work-log` (variant set by process) |
-| Do you want to learn along the way? | `explain-as-you-go` |
-| Will it have text that people read? | `writing` |
+| It uses third-party packages. | `dependencies` (the security answer picks the variant) |
+| Who handles git? Claude, asking before commits and pushes / Claude, committing straight to main / Claude, through branches and pull requests / I do. | `git-workflow` (the answer picks the variant) |
+| It has, or should have, automated tests. | `testing` (the structure answer picks the variant) |
+| The repository is public, or will be. | `public-repo` |
+| It has an interface that people use. | `accessibility` |
+| It handles data about the people who use it, such as accounts, payments or IP addresses in logs. It promises them they aren't tracked. | `user-data` (privacy-first if both apply) |
+| It gets deployed, or runs on a server. | `deploy-ops` |
+| I'll work on it over many sessions. | `work-log` (the structure answer picks the variant) |
+| I want to learn along the way, not only get results. | `explain-as-you-go` |
+| It has documentation or other text that people read. | `writing` |
 
-### Step 3: adjust
+### Advanced: fine-tune the rules
 
-Every module and variant can be switched by hand. The builder shows the prompt's
-length as you go, and warns when two choices clash (for example, `git-workflow`
-main together with `deploy-ops`).
+Every module and variant can be switched on or off by hand. Anything changed
+here overrides the answers above. The builder shows the prompt's length as you
+go, and warns when two choices conflict (for example, committing straight to
+main on a project that gets deployed).
 
 ## The modules
 

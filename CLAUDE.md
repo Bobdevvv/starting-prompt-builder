@@ -3,7 +3,7 @@
 claude-session-starter is a kit that builds a starting prompt for a new Claude
 session (Claude Code or claude.ai in the browser) from a short questionnaire and
 a set of combinable rule modules. It also ships as an embedded entry on the
-owner's personal site, and it includes one small test of whether its kickoff
+owner's personal site, and it includes one small test of whether its starting
 prompt changes what a session does.
 
 Read before working:

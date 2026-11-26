@@ -1,12 +1,12 @@
 ---
 id: work-log
-title: Work log across sessions
+title: Work log
 question: Will you work on it across many sessions?
 targets: code
 variants: light, full
 ---
 
-# Work log across sessions
+# Work log
 
 **Prevents:**
 - each new session starting from zero;
@@ -26,7 +26,7 @@ variants: light, full
 ## Rules: full
 
 - Every change belongs to a ticket in `tickets/`. If there isn't one, write it
-  first, then stop and wait for my go-ahead before implementing it. A ticket
+  first, then stop and wait for my approval before implementing it. A ticket
   written and built in the same turn gives me no chance to weigh in.
 - A ticket holds:
   - the goal;

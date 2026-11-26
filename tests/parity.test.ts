@@ -47,8 +47,8 @@ function answersOf(profile: Profile): Answers {
 describe("the builder hands out the tested prompt", () => {
   const armC = readProfile("research/arm-c-profile.json");
 
-  it("produces research/arm-c-prompt.md byte for byte from the arm C profile", () => {
-    expect(assemblePrompt(armC.target, choicesOf(armC), armC.project)).toBe(readText("research/arm-c-prompt.md"));
+  it("produces the re-tested text, research/arm-c2-prompt.md, byte for byte from the arm C profile", () => {
+    expect(assemblePrompt(armC.target, choicesOf(armC), armC.project)).toBe(readText("research/arm-c2-prompt.md"));
   });
 
   it("derives exactly arm C's modules from arm C's answers", () => {
@@ -56,10 +56,10 @@ describe("the builder hands out the tested prompt", () => {
   });
 
   it("matches the reference script for the sample profile too", () => {
-    const sample = readProfile("samples/kickoff-claude-code.profile.json");
+    const sample = readProfile("samples/starting-prompt-claude-code.profile.json");
     const fromEngine = assemblePrompt(sample.target, choicesOf(sample), sample.project);
     expect(fromEngine).toBe(referenceAssemblePrompt(sample));
-    expect(fromEngine).toBe(readText("samples/kickoff-claude-code.md"));
+    expect(fromEngine).toBe(readText("samples/starting-prompt-claude-code.md"));
     expect(deriveChoices(answersOf(sample))).toEqual(choicesOf(sample));
   });
 });

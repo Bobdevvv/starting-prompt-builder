@@ -14,7 +14,7 @@ assembles the prompt is next.
 - Ask a few yes/no questions: does the project deploy, handle user data, use
   third-party packages, live in a public repo?
 - Pick a small **core** of rules plus the **modules** that fit the answers.
-- Produce a **kickoff prompt** to paste as the first message of a session, in
+- Produce a **starting prompt** to paste as the first message of a session, in
   Claude Code or in claude.ai. For Claude Code it can also produce a short
   `CLAUDE.md`.
 
@@ -25,7 +25,7 @@ Every module states what it prevents. The modules are plain Markdown in
 
 One small test, with its rules fixed before the first run
 (`research/protocol.md`). Fresh Claude Code sessions got a building task with
-deliberately ambiguous data, half of them with the kit's kickoff prompt and half
+deliberately ambiguous data, half of them with the kit's starting prompt and half
 without. A script read each session's log and checked whether it started
 building before agreeing on a plan.
 

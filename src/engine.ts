@@ -186,7 +186,7 @@ function ruleSections(choices: readonly ModuleChoice[], target: Target): string[
   });
 }
 
-/** The kickoff prompt: opening, rules, the project, and what the first reply should be. */
+/** The starting prompt: opening, rules, the project, and what the first reply should be. */
 export function assemblePrompt(target: Target, choices: readonly ModuleChoice[], project: ProjectDescription): string {
   const filled = filledProject(project);
   // Replacement functions, not strings, so "$&" and the like in a user's text stay as typed.

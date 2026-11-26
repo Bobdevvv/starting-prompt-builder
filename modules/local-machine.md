@@ -1,11 +1,11 @@
 ---
 id: local-machine
-title: My own machine
+title: This computer
 question: Should Claude be extra careful with your computer itself, beyond the project folder? (switched on by strict security)
 targets: code
 ---
 
-# My own machine
+# This computer
 
 **Prevents:**
 - changes to your computer that you never saw happen;

@@ -18,7 +18,7 @@ separately and has no backend.
 
 ## D3. What it produces
 **Decided by the owner.**
-- **Main output: a kickoff prompt.** It is self-contained and works in Claude Code
+- **Main output: a starting prompt.** It is self-contained and works in Claude Code
   and in claude.ai.
 - **Secondary output: a `CLAUDE.md`**, for Claude Code only.
 
@@ -38,7 +38,7 @@ A small core is always included. Optional modules are added on top of it.
 The generated text is read at the start of every session, so its length costs
 attention. In the `CLAUDE.md` output, longer guidance goes in separate files
 linked by path, not pulled in with `@import`, because imports load at session
-start, which is what the split is meant to avoid. The kickoff prompt carries
+start, which is what the split is meant to avoid. The starting prompt carries
 everything inline, because a browser session cannot open files.
 
 **Verified against Claude Code's memory docs:** "Imported files are expanded and
@@ -46,12 +46,12 @@ loaded into context alongside the CLAUDE.md that references them". So `@import`
 saves no context, and linking by path is the right choice.
 (https://code.claude.com/docs/en/memory)
 
-## D6b. In Claude Code, the kickoff prompt hands over to a `CLAUDE.md`
+## D6b. In Claude Code, the starting prompt hands over to a `CLAUDE.md`
 Found during the source check. Claude Code re-reads the project-root `CLAUDE.md`
 after compaction, but instructions "given only in conversation" can be lost
-when a long session is compacted. A kickoff prompt is conversation, so in
+when a long session is compacted. A starting prompt is conversation, so in
 Claude Code its rules aren't guaranteed to last a long session. That's why the
-Claude Code kickoff prompt ends by offering to save its rules as a `CLAUDE.md`.
+Claude Code starting prompt ends by offering to save its rules as a `CLAUDE.md`.
 The browser version doesn't need this: claude.ai has no `CLAUDE.md`.
 (https://code.claude.com/docs/en/memory, "Instructions seem lost after
 `/compact`")
@@ -63,7 +63,7 @@ three arms, 195 runs) was dropped as out of proportion.
 
 **The test as decided:**
 - one behaviour: plan before building;
-- two arms: no prompt, and the kit's kickoff prompt;
+- two arms: no prompt, and the kit's starting prompt;
 - 10 runs per arm;
 - rules fixed before the first run, and scored by a script from the session's
   own log;

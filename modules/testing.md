@@ -15,8 +15,8 @@ variants: standard, strict-gate
 
 ## Rules: standard
 
-- New behaviour comes with tests. A bug fix starts with a test that fails
-  because of the bug.
+- Add tests for new behaviour. When fixing a bug, first write a test that
+  fails because of the bug.
 - Before calling a task done, run the full test suite and show the command and
   the result.
 - Never weaken, skip or delete a test to make it pass. If a test looks wrong,

@@ -1,11 +1,11 @@
 ---
 id: writing
-title: Writing for people
+title: Writing
 question: Will it have text that people read, such as docs, interface copy or posts?
 targets: code, browser
 ---
 
-# Writing for people
+# Writing
 
 **Prevents:** documentation and interface text that is padded, vague, or sounds
 like an advert.

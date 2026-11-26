@@ -1,11 +1,11 @@
 ---
 id: supply-chain
-title: Supply-chain checks in CI
+title: Dependency checks in CI
 question: Should dependencies be checked automatically, not only when they're added? (switched on by strict security)
 targets: code, browser
 ---
 
-# Supply-chain checks in CI
+# Dependency checks in CI
 
 **Prevents:**
 - a package that was safe when added turning malicious through a later update;

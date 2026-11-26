@@ -158,3 +158,32 @@ the list. Run 1's violation was genuine: it wrote `csv2json.py`.
    report its full usage. Cost is judged from the owner's usage meter instead.
 
 Approved by the owner before any further run.
+
+### Amendment A2 (2026-11-26, after all 20 runs): a re-test with clearer wording
+
+**Why.** After the test, the owner reviewed the kit's English, and parts of the
+tested text were found unclear. Examples: "check out over changes", the heading
+"How changes land", "say it in one line where I'll see it", and idioms such as
+"go-ahead". The wording was rewritten, with the same rules and nothing added or
+removed. The original arm C text is unchanged in `research/arm-c-prompt.md`.
+The builder now hands out the revised text, so that text is tested too.
+
+**What runs.**
+- **Arm C2:** runs 21 to 30, 10 runs, using `research/arm-c2-prompt.md`. It is
+  generated from the same profile (`research/arm-c-profile.json`) by the
+  same script, on the same fixture, task, model (`claude-sonnet-5-5`), CLI
+  (2.1.332) and runner settings.
+- Scoring follows §4 as amended by A1.
+
+arm C2 SHA-256: `a315ca0134072c2b21c776b07c6afb0f489f8163fc9028752446337e19c3980b`
+
+**Analysis.** The same one-sided Fisher exact test, C2 against the 10 arm A runs
+already done. Runs 1 to 20 and their analysis stay exactly as reported.
+
+**Limitation.** C2 is compared with arm A runs from earlier the same day, not
+alternated with new arm A runs. The task, model and CLI are unchanged, and arm A
+gets no prompt, so the revised wording can't affect it. A new arm A would only
+spend usage on a result that is already known.
+
+Approved by the owner (re-test chosen over keeping the old text or not
+re-testing) before any C2 run.
