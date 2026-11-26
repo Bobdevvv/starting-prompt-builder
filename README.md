@@ -31,8 +31,9 @@ building before agreeing on a plan.
 
 **Without the kit, 10 of 10 sessions started writing code straight away. With
 it, 0 of 10 did.** Each of those asked about the ambiguous data and waited
-(p = 5.4 × 10⁻⁶). What this does and doesn't show, and the one correction made
-along the way, are in `research/results.md`.
+(p = 5.4 × 10⁻⁶). After the wording was rewritten for clearer English, the
+revised prompt was tested again: 0 of 10 again. What this does and doesn't show,
+and the corrections made along the way, are in `research/results.md`.
 
 ## License
 

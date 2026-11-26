@@ -1,108 +1,153 @@
-// The builder's interface. The only file that touches the browser; all logic
-// lives in engine.ts. Built from standard form controls, so keyboard use and
-// screen readers work without extra code. Nothing is stored between visits
-// (decision D10).
+// The builder's interface, laid out like an order ticket: compact controls on
+// the left, a live summary of the chosen rule sets on the right, the generated
+// text below. The only file that touches the browser; all logic lives in
+// engine.ts. Built from standard form controls (radio groups, checkboxes,
+// selects, <details>), so keyboard use and screen readers work without extra
+// code. Nothing is stored between visits (decision D10). There is no animation,
+// so reduced-motion preferences need no separate path.
 
 import {
-  DEFAULT_ANSWERS, EMPTY_PROJECT, assembleClaudeMd, assemblePrompt, findConflicts, isAvailableFor, measureText,
-  resolveChoices, type Answers, type GitChoice, type ModuleOverrides, type ProjectDescription,
+  DEFAULT_ANSWERS, EMPTY_PROJECT, assembleClaudeMd, assemblePrompt, findConflicts, findModule, isAvailableFor,
+  measureText, resolveChoices, type Answers, type GitChoice, type ProjectDescription,
 } from "./engine";
 import { MODULES } from "./modules.data";
 
 type OutputKind = "prompt" | "claude-md";
 type BooleanAnswer = { [K in keyof Answers]: Answers[K] extends boolean ? K : never }[keyof Answers];
+type SegmentKey = "target" | "security" | "process" | "audience";
 
-interface Option<T extends string> { readonly value: T; readonly label: string }
+interface SegmentOption { readonly value: string; readonly label: string; readonly detail: string }
 
-const QUICK_QUESTIONS: ReadonlyArray<{ key: "target" | "security" | "process" | "audience"; legend: string;
-  options: ReadonlyArray<Option<string>> }> = [
-  { key: "target", legend: "Where will you use the prompt?", options: [
-    { value: "code", label: "Claude Code" }, { value: "browser", label: "claude.ai in the browser" }] },
-  { key: "security", legend: "How strict should security be?", options: [
-    { value: "standard", label: "Standard" }, { value: "strict", label: "Strict" }] },
-  { key: "process", legend: "How much process?", options: [
-    { value: "light", label: "Light" }, { value: "thorough", label: "Thorough" }] },
-  { key: "audience", legend: "Who is it for?", options: [
-    { value: "just-me", label: "Just me" }, { value: "other-people", label: "Other people" }] },
+const SEGMENTS: ReadonlyArray<{ key: SegmentKey; label: string; question: string; options: readonly SegmentOption[] }> = [
+  { key: "target", label: "Where", question: "Where will you start the session?", options: [
+    { value: "code", label: "Claude Code", detail: "Claude Code, in your terminal or editor." },
+    { value: "browser", label: "Browser", detail: "claude.ai in your browser. Rules about git and your computer are left out." },
+  ] },
+  { key: "security", label: "Security", question: "How strict should security be?", options: [
+    { value: "standard", label: "Standard", detail: "Ask before adding packages. Keep secrets out of code." },
+    { value: "strict", label: "Strict", detail: "Approved packages only, automatic dependency checks, secrets in a secret store, nothing outside the project folder." },
+  ] },
+  { key: "process", label: "Structure", question: "How much structure should Claude follow?", options: [
+    { value: "light", label: "Light", detail: "Plan first, then ask before risky steps." },
+    { value: "thorough", label: "Thorough", detail: "A ticket for every change, proof that tests pass, a decision log and naming rules." },
+  ] },
+  { key: "audience", label: "Users", question: "Who will use what you're building?", options: [
+    { value: "just-me", label: "Only me", detail: "Only you will use the result." },
+    { value: "other-people", label: "Others too", detail: "Other people will use the result. Adds testing, and accessibility and size limits if it has an interface." },
+  ] },
 ];
 
-const GIT_OPTIONS: ReadonlyArray<Option<GitChoice>> = [
-  { value: "with-permission", label: "Claude runs git, but asks before commits and pushes" },
-  { value: "pull-requests", label: "Claude works on branches and opens pull requests" },
-  { value: "main", label: "Claude commits straight to main" },
-  { value: "hands-off", label: "I handle git myself" },
+const GIT_OPTIONS: ReadonlyArray<{ value: GitChoice; label: string }> = [
+  { value: "with-permission", label: "Claude, asking before commits and pushes" },
+  { value: "pull-requests", label: "Claude, through branches and pull requests" },
+  { value: "main", label: "Claude, committing straight to main" },
+  { value: "hands-off", label: "I do" },
 ];
 
-/** Project facts. `isAsked` hides a question that the quick answers already settled. */
-const FACT_QUESTIONS: ReadonlyArray<{ key: BooleanAnswer; label: string; isAsked: (a: Answers) => boolean }> = [
-  { key: "usesPackages", label: "It uses third-party packages", isAsked: (a) => a.security !== "strict" },
-  { key: "hasTests", label: "It has, or should have, automated tests",
+/** Project facts. `isAsked` hides a fact that the answers above already decided. */
+const FACTS: ReadonlyArray<{ key: BooleanAnswer; label: string; isAsked: (a: Answers) => boolean }> = [
+  { key: "usesPackages", label: "Uses third-party packages", isAsked: (a) => a.security !== "strict" },
+  { key: "hasTests", label: "Has, or should have, automated tests",
     isAsked: (a) => a.process !== "thorough" && a.audience !== "other-people" },
-  { key: "isPublicRepo", label: "The repository is public, or will be", isAsked: () => true },
-  { key: "hasInterface", label: "It has an interface that people use", isAsked: () => true },
-  { key: "handlesUserData", label: "It handles data about the people who use it", isAsked: () => true },
-  { key: "promisesNoTracking", label: "It promises its users they aren't tracked",
-    isAsked: (a) => a.handlesUserData },
-  { key: "isDeployed", label: "It gets deployed, or runs on a server", isAsked: () => true },
-  { key: "spansManySessions", label: "I'll work on it across many sessions",
+  { key: "isPublicRepo", label: "The repository is public", isAsked: () => true },
+  { key: "hasInterface", label: "Has an interface people use", isAsked: () => true },
+  { key: "handlesUserData", label: "Handles data about its users", isAsked: () => true },
+  { key: "promisesNoTracking", label: "Promises users they aren't tracked", isAsked: (a) => a.handlesUserData },
+  { key: "isDeployed", label: "Gets deployed, or runs on a server", isAsked: () => true },
+  { key: "spansManySessions", label: "I'll work on it over many sessions",
     isAsked: (a) => a.target === "code" && a.process !== "thorough" },
-  { key: "wantsToLearn", label: "I want to learn along the way, not only get results", isAsked: () => true },
-  { key: "hasReadableText", label: "It has text people read, such as docs or interface copy", isAsked: () => true },
+  { key: "wantsToLearn", label: "I want to learn along the way", isAsked: () => true },
+  { key: "hasReadableText", label: "Has documentation or other text people read", isAsked: () => true },
 ];
 
 const PROJECT_FIELDS: ReadonlyArray<{ key: keyof ProjectDescription; label: string; hint: string }> = [
-  { key: "what", label: "What it is", hint: "For example: a habit tracker that runs in the browser" },
-  { key: "stack", label: "Built with", hint: "For example: TypeScript and Vite" },
-  { key: "where", label: "Where it stands", hint: "For example: an existing repo, or starting from nothing" },
-  { key: "goal", label: "This session's goal", hint: "For example: add a weekly overview screen" },
+  { key: "what", label: "What it is", hint: "a habit tracker that runs in the browser" },
+  { key: "stack", label: "Built with", hint: "TypeScript and Vite" },
+  { key: "where", label: "Where it stands", hint: "an existing repo, or starting from nothing" },
+  { key: "goal", label: "This session's goal", hint: "add a weekly overview screen" },
 ];
 
 const VARIANT_LABELS: Readonly<Record<string, string>> = {
-  "ask-first": "Ask first", strict: "Strict: approved list only", "with-permission": "Asks before commits and pushes",
-  main: "Straight to main", "pull-requests": "Branches and pull requests", "hands-off": "I handle git",
-  standard: "Standard", "strict-gate": "Strict gate", light: "Light", full: "Full ticket process",
-  "privacy-first": "Privacy-first",
+  "ask-first": "ask first", strict: "approved only", "with-permission": "asks first", main: "to main",
+  "pull-requests": "pull requests", "hands-off": "you handle it", standard: "standard", "strict-gate": "proof required",
+  light: "light", full: "full tickets", "privacy-first": "privacy-first",
 };
 
 const STYLE_TEXT = `
-.cssk { width: 100%; box-sizing: border-box; color: var(--color-text); font-family: var(--font-sans);
-  border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-panel); padding: 16px; }
+.cssk { container-type: inline-size; width: 100%; color: var(--color-text); font-family: var(--font-sans);
+  font-size: 0.9375rem; line-height: 1.45; }
 .cssk *, .cssk *::before, .cssk *::after { box-sizing: border-box; }
-.cssk h3 { font-size: 1rem; margin: 20px 0 8px; color: var(--color-text); }
-.cssk h3:first-child { margin-top: 0; }
-.cssk p.cssk-note { color: var(--color-muted); font-size: 0.875rem; margin: 0 0 8px; }
-.cssk fieldset { border: 0; margin: 0 0 12px; padding: 0; min-width: 0; }
-.cssk legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
-.cssk-choices { display: flex; flex-wrap: wrap; gap: 8px; }
-.cssk-choice, .cssk-check { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px;
-  border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-panel-2); cursor: pointer; }
-.cssk-choices .cssk-choice { flex: 1 1 140px; }
-.cssk-check { margin-bottom: 6px; }
-.cssk input[type="radio"], .cssk input[type="checkbox"] { width: 18px; height: 18px; margin: 0; flex: none;
-  accent-color: var(--color-accent); }
-.cssk-module { border: 1px solid var(--color-border); border-radius: 4px; padding: 8px 12px; margin-bottom: 6px;
-  background: var(--color-panel-2); }
-.cssk-module .cssk-check { border: 0; padding: 0 0; background: none; margin: 0; font-weight: 600; }
-.cssk-module p { color: var(--color-muted); font-size: 0.8125rem; margin: 0 0 6px 26px; }
+.cssk-ticket { border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-panel); }
+.cssk-bar { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border); font-family: var(--font-mono); font-size: 0.75rem;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-muted); }
+.cssk-bar strong { color: var(--color-text); font-weight: 600; }
+.cssk-grid { display: grid; grid-template-columns: 1fr; }
+@container (min-width: 600px) { .cssk-grid { grid-template-columns: minmax(0, 1fr) 220px; }
+  .cssk-side { border-top: 0 !important; border-left: 1px solid var(--color-border); } }
+.cssk-main { padding: 4px 14px 14px; min-width: 0; }
+.cssk-side { padding: 12px 14px; border-top: 1px solid var(--color-border); min-width: 0; }
+.cssk-label { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--color-muted); }
+.cssk fieldset { border: 0; margin: 0; padding: 12px 0 0; min-width: 0; }
+.cssk legend { padding: 0; margin-bottom: 6px; float: left; width: 100%; }
+.cssk legend + * { clear: both; }
+.cssk-segment { display: flex; border: 1px solid var(--color-border); border-radius: 4px; overflow: hidden; }
+.cssk-segment label { flex: 1 1 0; position: relative; display: block; cursor: pointer; }
+.cssk-segment label + label { border-left: 1px solid var(--color-border); }
+.cssk-segment span { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 6px 8px;
+  text-align: center; font-size: 0.875rem; color: var(--color-muted); background: var(--color-bg); }
+.cssk-segment input:checked + span { color: var(--color-bg); background: var(--color-accent); font-weight: 600; }
+.cssk-segment input:focus-visible + span { outline: 2px solid var(--color-text); outline-offset: -4px; }
+.cssk-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0; }
+.cssk-detail { margin: 6px 0 0; font-size: 0.8125rem; color: var(--color-muted); min-height: 1.45em; }
+.cssk-facts { display: grid; grid-template-columns: 1fr; gap: 0 16px; }
+@container (min-width: 460px) { .cssk-facts { grid-template-columns: 1fr 1fr; } }
+.cssk-check { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; font-size: 0.875rem; }
+.cssk input[type="checkbox"] { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--color-accent); }
 .cssk select, .cssk input[type="text"], .cssk textarea { width: 100%; min-height: 44px; font: inherit;
-  color: var(--color-text); background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 4px;
-  padding: 8px 10px; }
-.cssk-module select { margin-left: 26px; width: calc(100% - 26px); }
-.cssk label.cssk-field { display: block; font-weight: 600; margin: 10px 0 4px; }
-.cssk textarea { font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; min-height: 280px;
-  resize: vertical; white-space: pre-wrap; }
-.cssk-warning { border: 1px solid var(--color-down); border-radius: 4px; padding: 8px 12px; margin: 8px 0; }
-.cssk-warning::before { content: "Warning: "; font-weight: 600; color: var(--color-down); }
-.cssk-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
-.cssk button { min-height: 44px; min-width: 44px; padding: 8px 14px; font: inherit; font-weight: 600;
-  color: var(--color-text); background: var(--color-panel-2); border: 1px solid var(--color-border);
+  font-size: 0.875rem; color: var(--color-text); background: var(--color-bg); border: 1px solid var(--color-border);
+  border-radius: 4px; padding: 8px 10px; }
+.cssk details { margin-top: 14px; border-top: 1px solid var(--color-border); }
+.cssk summary { min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; }
+.cssk summary::-webkit-details-marker { display: none; }
+.cssk summary::before { content: "+"; font-family: var(--font-mono); color: var(--color-accent); width: 1ch; }
+.cssk details[open] > summary::before { content: "\\2212"; }
+.cssk-module { padding: 6px 0 10px; border-bottom: 1px solid var(--color-border); }
+.cssk-module:last-of-type { border-bottom: 0; }
+.cssk-module .cssk-check { min-height: 36px; font-weight: 600; }
+.cssk-module p { margin: 0 0 6px 28px; font-size: 0.8125rem; color: var(--color-muted); }
+.cssk-module select { margin-left: 28px; width: calc(100% - 28px); min-height: 40px; }
+.cssk-fields { display: grid; grid-template-columns: 1fr; gap: 0 12px; }
+@container (min-width: 460px) { .cssk-fields { grid-template-columns: 1fr 1fr; } }
+.cssk-field { display: block; margin-top: 10px; }
+.cssk-field .cssk-label { display: block; margin-bottom: 4px; }
+.cssk-list { list-style: none; margin: 8px 0 12px; padding: 0; font-size: 0.8125rem; }
+.cssk-list li { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0;
+  border-bottom: 1px dashed var(--color-border); }
+.cssk-list li span:last-child { font-family: var(--font-mono); color: var(--color-muted); text-align: right; }
+.cssk-warning { margin: 0 0 12px; padding-left: 10px; border-left: 2px solid var(--color-down); font-size: 0.8125rem; }
+.cssk-warning strong { color: var(--color-down); }
+.cssk button { min-height: 44px; min-width: 44px; padding: 8px 14px; font: inherit; font-size: 0.875rem;
+  font-weight: 600; color: var(--color-text); background: var(--color-panel-2); border: 1px solid var(--color-border);
   border-radius: 4px; cursor: pointer; }
-.cssk button[aria-pressed="true"] { border-color: var(--color-accent); color: var(--color-accent); }
+.cssk button:disabled { cursor: default; color: var(--color-muted); }
 .cssk button.cssk-primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); }
-.cssk-size { font-family: var(--font-mono); color: var(--color-muted); font-size: 0.8125rem; margin-left: auto; }
-.cssk-status { min-height: 1.5em; font-size: 0.875rem; color: var(--color-muted); }
+.cssk-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.cssk-actions button { flex: 1 1 auto; }
+.cssk-output { border-top: 1px solid var(--color-border); padding: 12px 14px 14px; }
+.cssk-output-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+  margin-bottom: 8px; }
+.cssk-tabs { display: flex; gap: 4px; }
+.cssk-tabs button { background: none; border-color: transparent; color: var(--color-muted); }
+.cssk-tabs button[aria-pressed="true"] { color: var(--color-text); border-color: var(--color-border);
+  background: var(--color-bg); }
+.cssk-size { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted); }
+.cssk textarea { font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.55; min-height: 300px;
+  resize: vertical; }
+.cssk-status { min-height: 1.45em; margin-top: 8px; font-size: 0.8125rem; color: var(--color-muted); }
 .cssk :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-.cssk-choice:focus-within, .cssk-check:focus-within { border-color: var(--color-accent); }
 .cssk [hidden] { display: none !important; }
 `;
 
@@ -138,56 +183,91 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
 
   const style = element("style", {}, [STYLE_TEXT]);
   const container = element("div", { class: "cssk" });
+  const ticket = element("div", { class: "cssk-ticket" });
+  const barCount = element("strong");
+  const mainColumn = element("div", { class: "cssk-main" });
+  const sideColumn = element("div", { class: "cssk-side" });
+  ticket.append(
+    element("div", { class: "cssk-bar" }, [element("span", {}, ["New session"]), element("span", {}, [barCount])]),
+    element("div", { class: "cssk-grid" }, [mainColumn, sideColumn]),
+  );
+  container.append(ticket);
 
-  // Step 1: the four quick questions.
-  container.append(element("h3", {}, ["1. Four quick questions"]));
-  for (const question of QUICK_QUESTIONS) {
-    const fieldset = element("fieldset", {}, [element("legend", {}, [question.legend])]);
-    const choices = element("div", { class: "cssk-choices" });
-    for (const option of question.options) {
-      const input = element("input", { type: "radio", name: `${idPrefix}-${question.key}`, value: option.value });
-      input.checked = answers[question.key] === option.value;
+  // The four questions that decide most of the prompt, as segmented controls.
+  const segmentDetails = new Map<SegmentKey, HTMLParagraphElement>();
+  for (const segment of SEGMENTS) {
+    const detail = element("p", { class: "cssk-detail", id: `${idPrefix}-${segment.key}-detail` });
+    segmentDetails.set(segment.key, detail);
+    const options = element("div", { class: "cssk-segment" });
+    for (const option of segment.options) {
+      const input = element("input", { type: "radio", class: "cssk-visually-hidden", name: `${idPrefix}-${segment.key}`,
+        value: option.value, "aria-describedby": detail.id });
+      input.checked = answers[segment.key] === option.value;
       input.addEventListener("change", () => {
-        answers = { ...answers, [question.key]: option.value } as Answers;
+        answers = { ...answers, [segment.key]: option.value } as Answers;
         update();
       }, { signal });
-      choices.append(element("label", { class: "cssk-choice" }, [input, option.label]));
+      options.append(element("label", {}, [input, element("span", {}, [option.label])]));
     }
-    fieldset.append(choices);
-    container.append(fieldset);
+    mainColumn.append(element("fieldset", {}, [
+      element("legend", {}, [element("span", { class: "cssk-label", "aria-hidden": "true" }, [segment.label]),
+        element("span", { class: "cssk-visually-hidden" }, [segment.question])]),
+      options, detail,
+    ]));
   }
 
-  // Step 2: facts about the project.
-  container.append(element("h3", {}, ["2. About the project"]));
-  const gitFieldset = element("fieldset", {}, [element("legend", {}, ["How should git work?"])]);
-  for (const option of GIT_OPTIONS) {
-    const input = element("input", { type: "radio", name: `${idPrefix}-git`, value: option.value });
-    input.checked = answers.git === option.value;
-    input.addEventListener("change", () => { answers = { ...answers, git: option.value }; update(); }, { signal });
-    gitFieldset.append(element("label", { class: "cssk-check" }, [input, option.label]));
-  }
-  container.append(gitFieldset);
-  const factFieldset = element("fieldset", {}, [element("legend", {}, ["Tick what applies"])]);
+  // Git, as a select: four choices are too many for a segmented row at 280px.
+  const gitId = `${idPrefix}-git`;
+  const gitSelect = element("select", { id: gitId });
+  for (const option of GIT_OPTIONS) gitSelect.append(element("option", { value: option.value }, [option.label]));
+  gitSelect.value = answers.git;
+  gitSelect.addEventListener("change", () => {
+    answers = { ...answers, git: gitSelect.value as GitChoice };
+    update();
+  }, { signal });
+  const gitField = element("label", { class: "cssk-field", for: gitId }, [
+    element("span", { class: "cssk-label" }, ["Who handles git"]), gitSelect]);
+  mainColumn.append(gitField);
+
+  // Facts about the project.
   const factLabels = new Map<BooleanAnswer, HTMLLabelElement>();
-  for (const fact of FACT_QUESTIONS) {
+  const facts = element("div", { class: "cssk-facts" });
+  for (const fact of FACTS) {
     const input = element("input", { type: "checkbox" });
     input.addEventListener("change", () => { answers = { ...answers, [fact.key]: input.checked }; update(); }, { signal });
     const label = element("label", { class: "cssk-check" }, [input, fact.label]);
     factLabels.set(fact.key, label);
-    factFieldset.append(label);
+    facts.append(label);
   }
-  container.append(factFieldset);
+  mainColumn.append(element("fieldset", {}, [
+    element("legend", {}, [element("span", { class: "cssk-label" }, ["The project (select all that apply)"])]), facts]));
 
-  // Step 3: every module, adjustable by hand.
-  container.append(element("h3", {}, ["3. Adjust the rules"]));
-  container.append(element("p", { class: "cssk-note" },
-    ["Your answers above switched these on or off. Change anything here; your changes win."]));
+  // The project description, all optional.
+  const fields = element("div", { class: "cssk-fields" });
+  for (const field of PROJECT_FIELDS) {
+    const inputId = `${idPrefix}-p-${field.key}`;
+    const input = element("input", { type: "text", id: inputId, placeholder: field.hint, autocomplete: "off" });
+    input.addEventListener("input", () => { project = { ...project, [field.key]: input.value }; update(); }, { signal });
+    fields.append(element("label", { class: "cssk-field", for: inputId }, [
+      element("span", { class: "cssk-label" }, [field.label]), input]));
+  }
+  mainColumn.append(element("fieldset", {}, [
+    element("legend", {}, [element("span", { class: "cssk-label" },
+      ["Describe it (optional; empty fields become [placeholders])"])]), fields]));
+
+  // Advanced: every rule set, adjustable by hand. Collapsed by default.
+  const advancedCount = element("span", { class: "cssk-size" });
+  const advanced = element("details", {}, [element("summary", {}, ["Advanced: fine-tune the rule sets ", advancedCount])]);
+  advanced.append(element("p", { class: "cssk-detail" },
+    ["Your answers already chose these. Anything you change here overrides those answers."]));
   const moduleControls = new Map<string, { box: HTMLElement; checkbox: HTMLInputElement; select: HTMLSelectElement | null }>();
   for (const moduleData of MODULES) {
-    const checkbox = element("input", { type: "checkbox", id: `${idPrefix}-m-${moduleData.id}` });
+    const checkboxId = `${idPrefix}-m-${moduleData.id}`;
+    const checkbox = element("input", { type: "checkbox", id: checkboxId });
     const box = element("div", { class: "cssk-module" }, [
-      element("label", { class: "cssk-check", for: `${idPrefix}-m-${moduleData.id}` }, [checkbox, moduleData.title]),
-      element("p", {}, [`Prevents: ${moduleData.prevents}`]),
+      element("label", { class: "cssk-check", for: checkboxId }, [checkbox,
+        moduleData.id === "core" ? "Core rules (always included)" : moduleData.title]),
+      element("p", {}, [`Prevents ${moduleData.prevents}`]),
     ]);
     if (moduleData.id === "core") {
       checkbox.checked = true;
@@ -199,59 +279,48 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
     }, { signal });
     let select: HTMLSelectElement | null = null;
     if (moduleData.variants.length > 1) {
-      select = element("select", { "aria-label": `${moduleData.title}: which version` });
+      const variantSelect = element("select", { "aria-label": `${moduleData.title}: which version` });
       for (const variant of moduleData.variants) {
-        select.append(element("option", { value: variant }, [VARIANT_LABELS[variant] ?? variant]));
+        variantSelect.append(element("option", { value: variant }, [VARIANT_LABELS[variant] ?? variant]));
       }
-      const variantSelect = select;
       variantSelect.addEventListener("change", () => {
         overrides = { ...overrides, [moduleData.id]: { isEnabled: true, variant: variantSelect.value } };
         update();
       }, { signal });
       box.append(variantSelect);
+      select = variantSelect;
     }
     moduleControls.set(moduleData.id, { box, checkbox, select });
-    container.append(box);
+    advanced.append(box);
   }
-  const resetButton = element("button", { type: "button" }, ["Undo my changes to the rules"]);
+  const resetButton = element("button", { type: "button" }, ["Reset to my answers"]);
   resetButton.addEventListener("click", () => { overrides = {}; update(); }, { signal });
+  advanced.append(element("div", { class: "cssk-actions" }, [resetButton]));
+  mainColumn.append(advanced);
+
+  // The summary column: what is in the prompt right now, and the actions.
+  const summaryList = element("ul", { class: "cssk-list", "aria-label": "Rule sets in the prompt" });
   const warnings = element("div");
-  container.append(element("div", { class: "cssk-row" }, [resetButton]), warnings);
-
-  // Step 4: the project, all optional.
-  container.append(element("h3", {}, ["4. Describe the project (optional)"]));
-  container.append(element("p", { class: "cssk-note" },
-    ["Anything left empty appears in the prompt as a [placeholder] to fill in after pasting."]));
-  for (const field of PROJECT_FIELDS) {
-    const inputId = `${idPrefix}-p-${field.key}`;
-    const input = element("input", { type: "text", id: inputId, placeholder: field.hint, autocomplete: "off" });
-    input.addEventListener("input", () => { project = { ...project, [field.key]: input.value }; update(); }, { signal });
-    container.append(element("label", { class: "cssk-field", for: inputId }, [field.label]), input);
-  }
-
-  // Output.
-  container.append(element("h3", {}, ["5. Your prompt"]));
-  const promptButton = element("button", { type: "button", "aria-pressed": "true" }, ["Starting prompt"]);
-  const claudeMdButton = element("button", { type: "button", "aria-pressed": "false" }, ["CLAUDE.md"]);
-  const sizeText = element("span", { class: "cssk-size" });
-  const outputId = `${idPrefix}-output`;
-  const output = element("textarea", { id: outputId, readonly: "", rows: "16", spellcheck: "false",
-    "aria-label": "The generated text" });
   const copyButton = element("button", { type: "button", class: "cssk-primary" }, ["Copy"]);
   const downloadButton = element("button", { type: "button" }, ["Download"]);
-  const status = element("div", { class: "cssk-status", role: "status", "aria-live": "polite" });
-  container.append(
-    element("div", { class: "cssk-row" }, [promptButton, claudeMdButton, sizeText]),
-    output,
-    element("div", { class: "cssk-row" }, [copyButton, downloadButton]),
-    status,
-  );
+  sideColumn.append(element("span", { class: "cssk-label" }, ["In the prompt"]), summaryList, warnings,
+    element("div", { class: "cssk-actions" }, [copyButton, downloadButton]));
 
-  promptButton.addEventListener("click", () => { outputKind = "prompt"; update(); }, { signal });
-  claudeMdButton.addEventListener("click", () => { outputKind = "claude-md"; update(); }, { signal });
+  // The generated text.
+  const promptTab = element("button", { type: "button", "aria-pressed": "true" }, ["Starting prompt"]);
+  const claudeMdTab = element("button", { type: "button", "aria-pressed": "false" }, ["CLAUDE.md"]);
+  const sizeText = element("span", { class: "cssk-size" });
+  const output = element("textarea", { readonly: "", rows: "16", spellcheck: "false", "aria-label": "The generated text" });
+  const status = element("div", { class: "cssk-status", role: "status", "aria-live": "polite" });
+  ticket.append(element("div", { class: "cssk-output" }, [
+    element("div", { class: "cssk-output-head" }, [element("div", { class: "cssk-tabs" }, [promptTab, claudeMdTab]), sizeText]),
+    output, status,
+  ]));
+
+  promptTab.addEventListener("click", () => { outputKind = "prompt"; update(); }, { signal });
+  claudeMdTab.addEventListener("click", () => { outputKind = "claude-md"; update(); }, { signal });
 
   copyButton.addEventListener("click", () => {
-    const text = output.value;
     const showManualCopy = (): void => {
       output.focus();
       output.select();
@@ -261,35 +330,40 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       showManualCopy();
       return;
     }
-    navigator.clipboard.writeText(text).then(
+    navigator.clipboard.writeText(output.value).then(
       () => { if (!signal.aborted) status.textContent = "Copied."; },
       () => { if (!signal.aborted) showManualCopy(); },
     );
   }, { signal });
 
   downloadButton.addEventListener("click", () => {
+    const fileName = outputKind === "claude-md" ? "CLAUDE.md" : "starting-prompt.md";
     const url = URL.createObjectURL(new Blob([output.value], { type: "text/markdown;charset=utf-8" }));
     pendingDownloadUrls.add(url);
-    const link = element("a", { href: url, download: outputKind === "claude-md" ? "CLAUDE.md" : "starting-prompt.md" });
-    link.click();
+    element("a", { href: url, download: fileName }).click();
     const timer = window.setTimeout(() => {
       URL.revokeObjectURL(url);
       pendingDownloadUrls.delete(url);
       pendingTimers.delete(timer);
     }, 0);
     pendingTimers.add(timer);
-    status.textContent = outputKind === "claude-md" ? "Downloaded CLAUDE.md." : "Downloaded starting-prompt.md.";
+    status.textContent = `Downloaded ${fileName}.`;
   }, { signal });
 
   function update(): void {
-    for (const fact of FACT_QUESTIONS) {
+    for (const segment of SEGMENTS) {
+      const selected = segment.options.find((option) => option.value === answers[segment.key]);
+      const detail = segmentDetails.get(segment.key);
+      if (detail) detail.textContent = selected?.detail ?? "";
+    }
+    gitField.hidden = answers.target !== "code";
+    for (const fact of FACTS) {
       const label = factLabels.get(fact.key);
       if (!label) continue;
       label.hidden = !fact.isAsked(answers);
       const input = label.querySelector("input");
       if (input) input.checked = answers[fact.key];
     }
-    gitFieldset.hidden = answers.target !== "code";
 
     const choices = resolveChoices(answers, overrides);
     for (const moduleData of MODULES) {
@@ -304,19 +378,28 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       }
     }
     resetButton.disabled = Object.keys(overrides).length === 0;
+    advancedCount.textContent = `${choices.length} on`;
 
-    warnings.replaceChildren(...findConflicts(choices).map((text) => element("p", { class: "cssk-warning" }, [text])));
+    summaryList.replaceChildren(...choices.map((choice) => {
+      const moduleData = findModule(choice.id);
+      const name = choice.id === "core" ? "Core rules" : moduleData?.title ?? choice.id;
+      return element("li", {}, [element("span", {}, [name]),
+        element("span", {}, [choice.variant ? VARIANT_LABELS[choice.variant] ?? choice.variant : "on"])]);
+    }));
+    warnings.replaceChildren(...findConflicts(choices).map((text) =>
+      element("p", { class: "cssk-warning" }, [element("strong", {}, ["Check: "]), text])));
 
     if (answers.target === "browser") outputKind = "prompt";
-    claudeMdButton.hidden = answers.target !== "code";
-    promptButton.setAttribute("aria-pressed", String(outputKind === "prompt"));
-    claudeMdButton.setAttribute("aria-pressed", String(outputKind === "claude-md"));
+    claudeMdTab.hidden = answers.target !== "code";
+    promptTab.setAttribute("aria-pressed", String(outputKind === "prompt"));
+    claudeMdTab.setAttribute("aria-pressed", String(outputKind === "claude-md"));
 
     output.value = outputKind === "claude-md"
       ? assembleClaudeMd(choices, project)
       : assemblePrompt(answers.target, choices, project);
     const size = measureText(output.value);
     sizeText.textContent = `${size.lines} lines · ${size.words} words`;
+    barCount.textContent = `${choices.length} rule sets`;
     status.textContent = "";
   }
 
