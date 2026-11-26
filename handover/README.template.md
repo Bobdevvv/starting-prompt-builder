@@ -1,143 +1,210 @@
 **Platform target: any**
 
-# Starting prompt builder
+# Starting prompt builder: handover
 
-**One-line summary:** Answer a few questions and get the first message for a new AI coding session, with the rules that project needs and none it doesn't.
-
-**Topics:** Developer tools, AI
-
-**Key facts:**
-
-- **What:** builds a starting prompt for a new session with an AI coding assistant, from four quick questions and a few facts about the project. It can also produce the instructions file a coding agent reads at the start of every session (`CLAUDE.md` or `AGENTS.md`).
-- **Stack:** TypeScript, with no dependencies; the rules are plain Markdown, turned into data at build time.
-- **Interesting bit:** the prompt was tested before it shipped. Fresh Claude Code sessions got a building task with deliberately ambiguous data. Without the prompt, 10 of 10 started writing code straight away; with it, 0 of 30 did, across three versions of the wording. Each asked about the data first and waited. The rules for the test were fixed and published before the first run.
-
-**Public repository:** https://github.com/Bobdevvv/starting-prompt-builder
+This folder holds an embedded Projects entry, built to `docs/embedded-entry-spec.md`
+(§12 for Projects). Below are the frontmatter, the page body, and notes for the
+host.
 
 **Measured size:** {SIZE}
 
+## Frontmatter
+
+Ready to paste into `src/content/projects/starting-prompt-builder.md`. Check
+`order` against the entries that exist when this lands.
+
+```yaml
+---
+title: "Starting prompt builder for AI coding sessions"
+slug: starting-prompt-builder
+summary: "Answer a few questions and get the first message for a new AI coding session, with only the rules that project needs."
+order: 30
+topics: ["AI"]
+kind: embedded
+platform: any
+facts:
+  - "**What:** asks a few questions about a project and builds the first message for a new session with an AI coding assistant, containing only the rules that project needs."
+  - "**Stack:** TypeScript with no dependencies, and the rules kept as plain Markdown."
+  - "**Interesting bit:** the builder can only hand out text that was tested. A test compares its output with the tested prompt byte for byte, so changing the wording of a rule means testing it again. That is how a rewrite for clearer English ended up being tested ten more times."
+links:
+  source: "https://github.com/Bobdevvv/starting-prompt-builder"
+  demo: ""
+placeholder: false
+---
+```
+
+**Topics:** `AI` is a new topic. None of the existing ones (Quant, Security,
+Automation) describes the work by its real definition, and "AI" does: the
+project is a tool for working with AI assistants.
+
+**Preview image:** none supplied. The spec allows a screenshot of the tool's own
+interface for a Projects entry, so the owner can take one of the builder on the
+live page if they want a tile image.
+
+## Page body
+
+Everything below this line, up to "Notes for the host", is the body.
+
 ---
 
-## Documentation (page body)
+A new session with an AI coding assistant starts out knowing nothing about how
+the person on the other end likes to work. It doesn't know that dependencies
+need approval first, that nothing gets committed without asking, or that a plan
+comes before any code. People who care about that tend to paste the same long
+list of rules into every session, and most people paste nothing at all.
 
-A new session with an AI coding assistant starts with no idea how you like to
-work. Some people paste the same long list of rules into every session; most
-paste nothing. This builder sits in between. It asks a few questions and puts
-together a starting prompt with only the rules that fit the project.
+The builder makes that list per project. It asks four quick questions and a
+handful of yes-or-no facts, and puts together a starting prompt that holds only
+the rules the project needs. The prompt goes in as the first message of a
+session, in Claude Code, in another coding agent such as Codex, Cursor or
+Gemini CLI, or in a chat in the browser such as claude.ai, ChatGPT or Gemini.
 
-### How it works
+## The short version
 
-Four quick questions decide most of the prompt: where you'll use it (Claude
-Code, another coding agent, or a chat in the browser), how strict security
-should be, how much process the AI should follow, and who will use what you're
-building. A few facts about the project add the rest: does it use third-party
-packages, is the repository public, does it get deployed, does it handle data
-about its users.
-
-Each answer switches on a **rule set**: a short block of plain instructions, such
-as asking before adding a dependency, keeping secrets out of the code, or never
-committing without permission. Every rule set says what it's there to prevent.
-Under **Advanced settings**, each one can be switched on or off by hand.
-
-Every prompt starts with a few core rules: plan before changing anything, ask
-when something is unclear, ask before anything that can't be undone, and only
-call something done after checking it. By default it also includes **Who
-decides**: you lead, and the AI advises, does exactly what you ask, checks its
-work and owns its mistakes.
-
-The prompt ends by asking the AI to reply with a plan and wait. For coding
-agents, it also asks the AI to offer to save the rules in the project's
-instructions file, so later sessions start with them too.
-
-### How to use it
-
-1. Answer the questions. The list on the right shows what the prompt will
-   contain.
-2. Optionally describe the project. Anything left empty becomes a placeholder
-   to fill in after pasting.
-3. Copy the prompt, or download it, and paste it as the first message of a new
-   session.
-
-Nothing you enter leaves your browser. It isn't sent anywhere or saved.
-
-### Does it work?
-
-The test asked one question: does the prompt stop the AI from building before a
-plan is agreed? Fresh Claude Code sessions, each with no memory, were given the
-same task: build a tool that converts CSV files to JSON. The sample data was
-ambiguous on purpose, with mixed date formats, two decimal styles and
-unexplained status codes. A session that starts building has to guess at those.
-
-A script read each session's log and checked whether it tried to write code
-before finishing its first reply. Nothing was judged by hand.
-
-| | started building first |
+| To… | the builder has |
 |---|---|
-| no prompt | **10 of 10** |
-| with the starting prompt (three versions of the wording) | **0 of 30** |
+| Get a prompt that fits the project | four quick questions and a few facts about the project |
+| See what ends up in the prompt | the list next to the questions, updated with every answer |
+| Add or remove single rule sets | Advanced settings |
+| Keep the rules for later sessions | a `CLAUDE.md` or `AGENTS.md` next to the prompt |
+| Take it into a session | Copy and Download |
 
-That difference is far beyond chance (one-sided Fisher exact test, p = 5.4 ×
-10⁻⁶ for each version). Without the prompt, every session silently picked one
-reading of the data and started writing code. With it, every session asked about
-the dates, the decimals and the status codes, and waited.
+## Choosing the rules
 
-**What it doesn't show:** that the prompt beats a single sentence such as "plan
-first", that the other rules work, that the effect lasts through a long session,
-or that it holds for other AI models. The tests used Claude only. The rules
-address the assistant as "you", so they're expected to work elsewhere, but
-that hasn't been tested.
+The four quick questions decide most of the prompt: where the session runs, how
+strict security should be, how much process the AI should follow, and whether
+other people will use what is being built. The facts below them each add one
+rule set. A project that uses third-party packages gets rules about asking
+before adding one. A public repository gets rules about keeping names, local
+paths and secrets out of every commit. A project that gets deployed gets rules
+about never touching a live server unless asked to.
 
-The protocol, every run's log and one correction made along the way (a command
-that only read a file was first scored as building) are in the repository.
+A rule set is a short block of plain instructions, and each one states what it
+is there to prevent. Some come in versions. Git, for example, can be run by the
+AI with commits and pushes only after permission, handled through branches and
+pull requests, committed straight to main, or left entirely to the person. In
+Advanced settings, every rule set can be switched on or off and every version
+changed by hand.
 
-### Where the rules come from
+Every prompt starts with the same core rules: plan before changing anything,
+ask when a request could mean two things, ask before anything that can't be
+undone, keep secrets out of the code, and only call something done after
+checking it. By default it also says who is in charge. The person leads and
+makes the decisions, and the AI advises, does what was asked and nothing more,
+checks its work before showing it and owns its mistakes. There is deliberately
+no "make no mistakes" rule. A model can't decide not to make mistakes, and
+telling it to mostly makes it sound more certain than it is.
 
-The rules come from a real long-running project's own working rules, general
-engineering practice, and published guidance: Anthropic's prompting
-documentation, OWASP, GitHub's security guides, WCAG 2.2 and the GDPR. Each rule
-set in the repository lists its sources, and says plainly where there isn't one.
+## Getting the prompt
+
+The prompt ends by asking the AI to reply with a summary of the project, a list
+of anything unclear and a proposed first step, and then to wait. In a coding
+agent it also asks the AI to offer to save the rules, word for word, in the
+project's instructions file, so that every later session starts with them. In
+Claude Code, rules kept there also survive when a long session gets compacted,
+which rules given only in the chat don't.
+
+Fields left empty in the project description turn into placeholders in square
+brackets, to be filled in after pasting. Copy puts the prompt on the clipboard
+and Download saves it as a file. Everything stays in the browser. Nothing typed
+into the builder is sent anywhere or saved, and it's gone when the page is
+closed.
+
+## Does it work?
+
+A prompt like this is easy to write and hard to check, so this one was tested
+before it went out. The test asked a single question: does the prompt stop the
+AI from building before a plan has been agreed?
+
+Fresh Claude Code sessions, each starting with no memory, all got the same task:
+build a command-line tool that converts the project's CSV exports to JSON. The
+sample file was ambiguous on purpose. Its dates came in two formats, some
+amounts used a decimal comma and others a decimal point, and its status codes
+were never explained. A session that starts building straight away has to guess
+at all of that. A script read each session's log and checked whether it tried
+to write code before its first reply was finished, so no run was scored by
+hand, and the rules of the test were published before the first run.
+
+| | started building before asking |
+|---|---|
+| without a starting prompt | 10 of 10 |
+| with the starting prompt | 0 of 30 |
+
+The 30 runs with the prompt cover three versions of it: the original, a rewrite
+in clearer English, and the current default with the "who decides" rules added.
+Each version ran ten times and came out 0 of 10. Against the runs without a
+prompt, a one-sided Fisher exact test puts that at p = 5.4 × 10⁻⁶ for each
+version. Without the prompt, every session looked through the project and
+started writing a converter without asking a single question. One of them did
+so without having read the CSV at all: its attempts to open the file failed,
+and it went ahead anyway. With it, every
+session replied with a long list of questions, always including the dates, the
+decimals and the status codes, then proposed a first step and waited.
+
+That is a narrow result, and the edges are worth stating. It shows that the
+prompt changes what the AI does first, for this task and this model. It doesn't
+show that the prompt does better than a single sentence such as "plan first",
+that the other rules in it work, or that the effect lasts through a long
+session. Every run used Claude. The rules address the AI as "you" and never name
+a particular model, so they are expected to work in other tools too, but that
+hasn't been tested.
+
+One correction was made along the way. In the second run, a command that only
+read the CSV file was scored as building, because the list of read-only commands
+was incomplete. The rule was fixed, the fix was published before that run was
+repeated, and every run was scored again under the corrected rule. The
+protocol, all 41 attempts and their logs are in the repository.
+
+## Where the rules come from
+
+The rules started from the working rules of a long-running personal project.
+The rest come from general engineering practice and from published guidance:
+Anthropic's prompting documentation, the OWASP cheat sheets on secrets and
+logging, GitHub's security guides, WCAG 2.2 and the GDPR. Every rule set in the
+repository lists its sources, and where a rule is a judgement call rather than
+something with a source behind it, it says so.
 
 ---
 
-## For the host (not for the page)
+## Notes for the host
 
-- **Files:** `engine.ts`, `engine.test.ts`, `view.ts`, `modules.data.ts` (five
-  files with this README; agreed with the owner). `modules.data.ts` is generated
-  from the repository's Markdown rule sets. Keeping it separate keeps the rules
-  out of the logic, and it only changes when the wording does. Don't edit it here;
-  regenerate it in the repository.
-- **Entry point:** `initEmbeddedEntry(root)` in `view.ts`. It returns a teardown
-  that removes every listener, cancels pending timers and revokes any download
-  URL that's still waiting.
-- **Storage:** none. No `localStorage` keys, no cookies, no network requests. The
-  repository's tests fail if any of these appear.
-- **Controls:** keyboard and pointer, all standard form controls (radio groups,
-  checkboxes, selects, a `<details>` section, buttons). Copy uses
-  `navigator.clipboard.writeText` and shows the result in an `aria-live`
-  region. If the clipboard refuses, it selects the text in the read-only field
-  so it can be copied by hand. Download uses a local `Blob`, and the object URL
-  is revoked after the click and in the teardown.
-- **Host variables used:** the colour and font tokens from the spec, and
-  `--sticky-header-height` (falls back to 0). It keeps the "In the prompt"
-  column below the pinned header while scrolling.
-- **Motion:** colour fades, a slide-open for Advanced settings, and items sliding
-  into the summary list. With `prefers-reduced-motion: reduce`, all of it is off
-  and the builder works the same.
-- **Layout:** it follows its own width with a container query: two columns from
-  600px, one below. It's usable at 280px. Text fields use 16px on touch screens,
-  so phones don't zoom in.
-- **Newer CSS, used as progressive enhancement:** `field-sizing: content` (a JS
-  fallback grows the fields where it's missing), `interpolate-size` and
-  `::details-content` (without them, Advanced opens instantly), and `:has()`
-  (only greys out the text of settled facts).
+- **Files:** `engine.ts`, `engine.test.ts`, `view.ts` and `modules.data.ts`. That
+  makes five files with this README, which the owner agreed to.
+  `modules.data.ts` is generated from the repository's Markdown rule sets. It's a
+  separate file so the rule text stays out of the logic, and it only changes
+  when the wording does. Regenerate it in the repository; don't edit it here.
+- **Entry point:** `initEmbeddedEntry(root)` in `view.ts`. The teardown removes
+  every listener, cancels pending timers and revokes any download URL that's
+  still waiting.
+- **Storage and network:** none. There are no `localStorage` keys, no cookies and
+  no requests. The repository's tests fail if any of them appear.
+- **Controls:** standard form controls only: radio groups, checkboxes, selects,
+  a `<details>` section and buttons. They all work with a keyboard and a
+  pointer. Copy uses `navigator.clipboard.writeText` and announces the result in
+  an `aria-live` region. If the clipboard refuses, the text in the read-only
+  field is selected so it can be copied by hand. Download uses a local `Blob`;
+  the object URL is revoked after the click and in the teardown.
+- **Host values used:** the colour and font tokens from the spec, and
+  `--sticky-header-height` (with 0 as the fallback). The "In the prompt" column
+  uses it to stay below the pinned header while the page scrolls.
+- **Motion:** colour fades, Advanced settings sliding open, and rule sets sliding
+  into the summary list. With `prefers-reduced-motion: reduce`, all of it is
+  off and the builder works the same.
+- **Layout:** a container query sets the layout from the builder's own width:
+  two columns from 600px, one below that. It works down to 280px. Text fields
+  use 16px on touch screens, so phones don't zoom in on them.
+- **Newer CSS, used only where supported:** `field-sizing: content` (a small
+  script grows the fields where it's missing), `interpolate-size` and
+  `::details-content` (without them, Advanced settings opens instantly), and
+  `:has()` (it only greys out settled facts).
 
-### Unsure about
+### Not yet certain
 
-- The measured size is unminified, so it's an upper bound. The host build should
-  come in smaller.
-- I couldn't check it in a real browser or on a real phone. All logic is unit
-  tested and the type check is strict, but the visual result and keyboard flow
-  were only checked by the owner, in a local preview.
+- The measured size is unminified, so it's an upper bound. The host's build
+  should come out smaller.
+- The builder hasn't been checked in a real browser or on a real phone by the
+  author. All logic is unit tested and the type check is strict, but the look
+  and the keyboard flow were only checked by the owner, in a local preview.
 - The privacy line ("everything you enter here stays in your browser") is true
-  for the builder's own code. The host page shouldn't add anything that reads
+  of the builder's own code. The host page shouldn't add anything that reads
   the form.

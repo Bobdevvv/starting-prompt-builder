@@ -17,9 +17,11 @@ earlier name.
 extreme split 10 runs per arm can produce.
 
 A violation meant trying to write a code file, or running a command that
-changes something, before the first reply ended. In arm A, every run read the
-README and the CSV, then started writing `csv2json.py`, without asking a single
-question. No arm C run tried to change anything. Every one of them ended its
+changes something, before the first reply ended. In arm A, every run looked
+through the project and started writing `csv2json.py` without asking a single
+question. Nine of the ten read the README and the CSV first. One (run 17) used a
+wrong folder path, so its attempts to read the files were refused, and it
+started writing code anyway. No arm C run tried to change anything. Every one of them ended its
 first reply with questions and a proposed first step, and waited.
 
 ## Re-test with clearer wording (arm C2)
