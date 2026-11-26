@@ -1,4 +1,4 @@
-# claude-session-starter
+# starting-prompt-builder
 
 Build the first prompt of a new Claude session from a few questions. You get
 the rules that project actually needs, and none of the ones it doesn't.
@@ -51,10 +51,11 @@ and the corrections made along the way, are in `research/results.md`.
   [LICENSE](LICENSE).
 - **Written content** (`modules/`, `samples/`, `docs/`, and the protocol and
   write-ups in `research/`): Creative Commons Attribution 4.0 International,
-  see [LICENSE-CONTENT](LICENSE-CONTENT). Credit: "claude-session-starter by
+  see [LICENSE-CONTENT](LICENSE-CONTENT). Credit: "starting-prompt-builder by
   Bob (github.com/Bobdevvv)", with a link to this repository.
 - **Your prompts are yours.** As an extra permission on top of CC BY 4.0, you
-  may use, change and publish any prompt or `CLAUDE.md` made with the builder,
+  may use, change and publish any prompt or instructions file (`CLAUDE.md`,
+  `AGENTS.md`) made with the builder,
   or put together from the modules' Rules sections, without credit. That
   includes committing it to a public repository. Credit is only asked for when
   you republish the modules themselves, as a collection or in a kit of your

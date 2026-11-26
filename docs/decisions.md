@@ -3,7 +3,7 @@
 Each entry records what was decided, by whom, and why. Change one only by
 adding a new entry that supersedes it.
 
-## D1. Name and repository
+## D1. Name and repository (name replaced by D13)
 **Decided by the owner.** The public GitHub repository is `claude-session-starter`,
 in lowercase kebab-case. GitHub sets no naming rule; kebab-case is the dominant
 convention because it matches URLs and package names. The README says plainly
@@ -121,3 +121,11 @@ prompt is still exactly the tested text. The builder says "the AI" where it mean
 the assistant. **The prompts were tested with Claude only** (Claude Code, one
 Sonnet model). The builder, the README and the write-up say so, and describe
 other tools as expected to work, not tested.
+
+## D13. New name: starting-prompt-builder (replaces the name in D1)
+**Decided by the owner.** The repository is renamed from `claude-session-starter`
+to `starting-prompt-builder`, still in lowercase kebab-case. The project now
+builds starting prompts for Claude Code, other coding agents and browser chats
+(D12), so the name says what it does rather than naming one AI. GitHub
+redirects the old address. The temporary test folders keep their old name,
+`claude-session-starter-trials`, because it appears in the published run logs.
