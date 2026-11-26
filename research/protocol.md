@@ -1,7 +1,7 @@
 # Test protocol: does the kickoff prompt stop Claude from building before agreeing a plan?
 
-Status: **DRAFT.** It is fixed when it is committed together with the final
-arm C text (§3), and from then on it changes only through §8.
+Status: **fixed before the first run** (§8). From here on it changes only
+through a dated amendment in §8.
 
 ## 1. Question
 
@@ -114,4 +114,12 @@ judgement involved. Its rules have unit tests.
 
 ## 8. Amendments and freeze
 
-None yet. The arm C SHA-256 is recorded here when the protocol is fixed.
+**Fixed before the first run.** The protocol, the scorer and the fixture are as
+committed together with this line.
+
+arm C SHA-256: `d27562d08e8683a5276992ef9a59395e4a622ceb0b2f07d37b8dd6d5703a11b6`
+
+The runner refuses to start if `research/arm-c-prompt.md` doesn't match this
+hash.
+
+Amendments: none.
