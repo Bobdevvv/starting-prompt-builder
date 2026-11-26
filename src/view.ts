@@ -84,9 +84,13 @@ const STYLE_TEXT = `
 .cssk-bar strong { color: var(--color-text); font-weight: 600; }
 .cssk-grid { display: grid; grid-template-columns: 1fr; }
 @container (min-width: 600px) { .cssk-grid { grid-template-columns: minmax(0, 1fr) 220px; }
-  .cssk-side { border-top: 0 !important; border-left: 1px solid var(--color-border); } }
+  .cssk-side { border-top: 0 !important; border-left: 1px solid var(--color-border); }
+  .cssk-side-inner { position: sticky; top: calc(var(--sticky-header-height, 0px) + 12px);
+    max-height: calc(100vh - var(--sticky-header-height, 0px) - 24px); overflow-y: auto; } }
 .cssk-main { padding: 4px 14px 14px; min-width: 0; }
 .cssk-side { padding: 12px 14px; border-top: 1px solid var(--color-border); min-width: 0; }
+.cssk-side-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cssk-side-head button { min-height: 36px; padding: 4px 10px; font-size: 0.8125rem; }
 .cssk-label { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--color-muted); }
 .cssk fieldset { border: 0; margin: 0; padding: 12px 0 0; min-width: 0; }
@@ -109,10 +113,18 @@ const STYLE_TEXT = `
 .cssk select, .cssk input[type="text"], .cssk textarea { width: 100%; min-height: 44px; font: inherit;
   font-size: 0.875rem; color: var(--color-text); background: var(--color-bg); border: 1px solid var(--color-border);
   border-radius: 4px; padding: 8px 10px; }
-.cssk details { margin-top: 14px; border-top: 1px solid var(--color-border); }
-.cssk summary { min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; }
+@media (pointer: coarse) { .cssk select, .cssk input[type="text"], .cssk textarea { font-size: 16px; } }
+.cssk details { margin-top: 16px; border: 1px solid var(--color-border); border-radius: 4px;
+  background: var(--color-bg); scroll-margin-top: calc(var(--sticky-header-height, 0px) + 12px); }
+.cssk summary { min-height: 52px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer;
+  list-style: none; }
 .cssk summary::-webkit-details-marker { display: none; }
-.cssk summary::before { content: "+"; font-family: var(--font-mono); color: var(--color-accent); width: 1ch; }
+.cssk summary::before { content: "+"; font-family: var(--font-mono); font-size: 1.125rem; color: var(--color-accent);
+  width: 1ch; flex: none; }
+.cssk summary strong { display: block; font-size: 0.9375rem; }
+.cssk summary small { display: block; font-size: 0.8125rem; color: var(--color-muted); }
+.cssk details[open] > summary { border-bottom: 1px solid var(--color-border); }
+.cssk-advanced-body { padding: 0 12px 12px; }
 .cssk details[open] > summary::before { content: "\\2212"; }
 .cssk-module { padding: 6px 0 10px; border-bottom: 1px solid var(--color-border); }
 .cssk-module:last-of-type { border-bottom: 0; }
@@ -256,10 +268,13 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       ["Describe it (optional; empty fields become [placeholders])"])]), fields]));
 
   // Advanced: every rule set, adjustable by hand. Collapsed by default.
-  const advancedCount = element("span", { class: "cssk-size" });
-  const advanced = element("details", {}, [element("summary", {}, ["Advanced: fine-tune the rule sets ", advancedCount])]);
-  advanced.append(element("p", { class: "cssk-detail" },
-    ["Your answers already chose these. Anything you change here overrides those answers."]));
+  const advancedCount = element("small");
+  const advancedSummary = element("summary", {}, [element("span", {}, [
+    element("strong", {}, ["Advanced settings"]), advancedCount])]);
+  const advanced = element("details", { id: `${idPrefix}-advanced` }, [advancedSummary]);
+  const advancedBody = element("div", { class: "cssk-advanced-body" }, [element("p", { class: "cssk-detail" },
+    ["Your answers above already chose these rule sets. Anything you change here overrides those answers."])]);
+  advanced.append(advancedBody);
   const moduleControls = new Map<string, { box: HTMLElement; checkbox: HTMLInputElement; select: HTMLSelectElement | null }>();
   for (const moduleData of MODULES) {
     const checkboxId = `${idPrefix}-m-${moduleData.id}`;
@@ -291,11 +306,11 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       select = variantSelect;
     }
     moduleControls.set(moduleData.id, { box, checkbox, select });
-    advanced.append(box);
+    advancedBody.append(box);
   }
   const resetButton = element("button", { type: "button" }, ["Reset to my answers"]);
   resetButton.addEventListener("click", () => { overrides = {}; update(); }, { signal });
-  advanced.append(element("div", { class: "cssk-actions" }, [resetButton]));
+  advancedBody.append(element("div", { class: "cssk-actions" }, [resetButton]));
   mainColumn.append(advanced);
 
   // The summary column: what is in the prompt right now, and the actions.
@@ -303,8 +318,16 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   const warnings = element("div");
   const copyButton = element("button", { type: "button", class: "cssk-primary" }, ["Copy"]);
   const downloadButton = element("button", { type: "button" }, ["Download"]);
-  sideColumn.append(element("span", { class: "cssk-label" }, ["In the prompt"]), summaryList, warnings,
-    element("div", { class: "cssk-actions" }, [copyButton, downloadButton]));
+  // "Change" opens Advanced settings and moves focus there, for people who look at the summary first.
+  const changeButton = element("button", { type: "button", "aria-controls": advanced.id }, ["Change"]);
+  changeButton.addEventListener("click", () => {
+    advanced.open = true;
+    advancedSummary.focus();
+  }, { signal });
+  // The inner wrapper is the part that scrolls along with the page, within its own column.
+  sideColumn.append(element("div", { class: "cssk-side-inner" }, [
+    element("div", { class: "cssk-side-head" }, [element("span", { class: "cssk-label" }, ["In the prompt"]), changeButton]),
+    summaryList, warnings, element("div", { class: "cssk-actions" }, [copyButton, downloadButton])]));
 
   // The generated text.
   const promptTab = element("button", { type: "button", "aria-pressed": "true" }, ["Starting prompt"]);
@@ -378,7 +401,9 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       }
     }
     resetButton.disabled = Object.keys(overrides).length === 0;
-    advancedCount.textContent = `${choices.length} on`;
+    const availableCount = MODULES.filter((moduleData) => isAvailableFor(moduleData, answers.target)).length;
+    advancedCount.textContent =
+      `Turn individual rule sets on or off. ${choices.length} of ${availableCount} are included now.`;
 
     summaryList.replaceChildren(...choices.map((choice) => {
       const moduleData = findModule(choice.id);

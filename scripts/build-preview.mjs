@@ -30,18 +30,27 @@ const PREVIEW_PAGE = `<!DOCTYPE html>
     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
   }
+  /* Stands in for the host site's pinned header, which publishes its height in this variable. */
+  :root { --sticky-header-height: 56px; }
   body { margin: 0; background: var(--color-bg); color: var(--color-text); font-family: var(--font-sans); }
+  .fake-header { position: sticky; top: 0; z-index: 1; height: var(--sticky-header-height); display: flex;
+    align-items: center; padding: 0 20px; background: var(--color-panel-2); border-bottom: 1px solid var(--color-border);
+    color: var(--color-muted); font-size: 0.875rem; }
   main { max-width: 728px; margin: 0 auto; padding: 24px 20px; }
-  .preview-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; color: var(--color-muted); }
-  .preview-bar button { min-height: 44px; padding: 8px 14px; font: inherit; color: var(--color-text);
+  .preview-test { margin-bottom: 16px; padding: 10px 12px; border: 1px dashed var(--color-border); border-radius: 4px;
+    color: var(--color-muted); font-size: 0.875rem; }
+  .preview-test button { min-height: 44px; padding: 8px 14px; margin-top: 8px; font: inherit; color: var(--color-text);
     background: var(--color-panel-2); border: 1px solid var(--color-border); border-radius: 4px; }
 </style>
 </head>
 <body>
+<div class="fake-header">Stand-in for the site's pinned header (preview only)</div>
 <main>
-  <div class="preview-bar">
-    <button type="button" id="toggle-mount">Unmount</button>
-    <span>Preview only: the column is capped at 728px, as on the host site.</span>
+  <div class="preview-test">
+    <strong>Preview test, not part of the builder.</strong> This button removes the builder from the page,
+    the way the site does when someone leaves the page, and adds it back on the second click. It checks that
+    removing the builder leaves nothing behind.
+    <br><button type="button" id="toggle-mount">Remove the builder</button>
   </div>
   <div id="root"></div>
 </main>
@@ -51,8 +60,8 @@ const PREVIEW_PAGE = `<!DOCTYPE html>
   const toggle = document.getElementById("toggle-mount");
   let teardown = initEmbeddedEntry(root);
   toggle.addEventListener("click", () => {
-    if (teardown) { teardown(); teardown = null; toggle.textContent = "Mount"; }
-    else { teardown = initEmbeddedEntry(root); toggle.textContent = "Unmount"; }
+    if (teardown) { teardown(); teardown = null; toggle.textContent = "Add the builder back"; }
+    else { teardown = initEmbeddedEntry(root); toggle.textContent = "Remove the builder"; }
   });
 </script>
 </body>
