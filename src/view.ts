@@ -114,14 +114,20 @@ const STYLE_TEXT = `
   font-size: 0.875rem; color: var(--color-text); background: var(--color-bg); border: 1px solid var(--color-border);
   border-radius: 4px; padding: 8px 10px; }
 @media (pointer: coarse) { .cssk select, .cssk input[type="text"], .cssk textarea { font-size: 16px; } }
-.cssk details { margin-top: 16px; border: 1px solid var(--color-border); border-radius: 4px;
-  background: var(--color-bg); scroll-margin-top: calc(var(--sticky-header-height, 0px) + 12px); }
-.cssk summary { min-height: 52px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer;
+.cssk details { margin-top: 18px; border: 1px solid var(--color-border); border-left: 3px solid var(--color-accent);
+  border-radius: 4px; background: var(--color-panel-2);
+  scroll-margin-top: calc(var(--sticky-header-height, 0px) + 12px); }
+.cssk summary { min-height: 60px; display: flex; align-items: center; gap: 12px; padding: 10px 12px; cursor: pointer;
   list-style: none; }
+.cssk summary:hover { background: var(--color-bg); }
 .cssk summary::-webkit-details-marker { display: none; }
-.cssk summary::before { content: "+"; font-family: var(--font-mono); font-size: 1.125rem; color: var(--color-accent);
-  width: 1ch; flex: none; }
-.cssk summary strong { display: block; font-size: 0.9375rem; }
+.cssk summary::before { content: "+"; display: flex; align-items: center; justify-content: center; flex: none;
+  width: 28px; height: 28px; border: 1px solid var(--color-accent); border-radius: 4px;
+  font-family: var(--font-mono); font-size: 1.125rem; color: var(--color-accent); }
+.cssk summary::after { content: "Show"; margin-left: auto; flex: none; font-family: var(--font-mono);
+  font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent); }
+.cssk details[open] > summary::after { content: "Hide"; }
+.cssk summary strong { display: block; font-size: 0.9375rem; color: var(--color-accent); }
 .cssk summary small { display: block; font-size: 0.8125rem; color: var(--color-muted); }
 .cssk details[open] > summary { border-bottom: 1px solid var(--color-border); }
 .cssk-advanced-body { padding: 0 12px 12px; }
@@ -227,6 +233,22 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       options, detail,
     ]));
   }
+
+  // "Who decides": on by default, shown here rather than in Advanced because it shapes every reply.
+  const leadInput = element("input", { type: "checkbox" });
+  leadInput.checked = answers.userLeads;
+  leadInput.addEventListener("change", () => {
+    answers = { ...answers, userLeads: leadInput.checked };
+    // This switch and the same rule set in Advanced settings must never disagree: the switch wins.
+    const { "user-leads": _replaced, ...otherOverrides } = overrides;
+    overrides = otherOverrides;
+    update();
+  }, { signal });
+  mainColumn.append(element("fieldset", {}, [
+    element("legend", {}, [element("span", { class: "cssk-label" }, ["Who decides"])]),
+    element("label", { class: "cssk-check" }, [leadInput,
+      "You lead: Claude advises, does exactly what you ask, checks its work and owns its mistakes"]),
+  ]));
 
   // Git, as a select: four choices are too many for a segmented row at 280px.
   const gitId = `${idPrefix}-git`;
@@ -400,6 +422,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
         controls.select.disabled = choice === undefined;
       }
     }
+    leadInput.checked = choices.some((choice) => choice.id === "user-leads");
     resetButton.disabled = Object.keys(overrides).length === 0;
     const availableCount = MODULES.filter((moduleData) => isAvailableFor(moduleData, answers.target)).length;
     advancedCount.textContent =

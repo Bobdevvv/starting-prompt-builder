@@ -15,7 +15,7 @@ const OUTPUT_PATH = join(REPO_ROOT, "src", "modules.data.ts");
 
 // The order modules appear in a generated prompt.
 export const MODULE_ORDER = [
-  "core", "dependencies", "supply-chain", "secrets-strict", "local-machine", "git-workflow",
+  "core", "user-leads", "dependencies", "supply-chain", "secrets-strict", "local-machine", "git-workflow",
   "testing", "work-log", "code-clarity", "public-repo", "accessibility", "user-data",
   "deploy-ops", "budgets", "explain-as-you-go", "writing",
 ];

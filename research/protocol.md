@@ -187,3 +187,29 @@ spend usage on a result that is already known.
 
 Approved by the owner (re-test chosen over keeping the old text or not
 re-testing) before any C2 run.
+
+### Amendment A3 (2026-11-26, after the C2 runs): the "Who decides" rule set
+
+**Why.** The owner asked for rules that keep the person in charge: Claude
+advises, does exactly what was asked, checks its work and owns its mistakes.
+They became a new module, `modules/user-leads.md`, which is **on by default** in
+the builder. The builder's default prompt changed, so it is tested again.
+
+**What runs.**
+- **Arm C3:** runs 31 to 40, 10 runs, using `research/arm-c3-prompt.md`. It is
+  generated from `research/arm-c3-profile.json`, which is arm C's profile with
+  "Who decides" added.
+- Same fixture, task, model, CLI and runner settings as before. Scoring follows
+  §4 as amended by A1.
+
+arm C3 SHA-256: `098cbcdf07ef5cc9902a93843c736cc47e2094584c6d873564dbc47cdd6d5b08`
+
+**Analysis.** The same one-sided Fisher exact test, C3 against the 10 arm A runs.
+All earlier runs and their analysis stay as reported. The same limitation as A2
+applies: arm A isn't run again alongside C3.
+
+**What this does not test:** whether the new rules themselves work (for example,
+whether Claude stays within the request). It only checks that adding them
+doesn't weaken the plan-first behaviour the test measures.
+
+Approved by the owner (on by default, with a re-test) before any C3 run.

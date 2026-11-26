@@ -31,6 +31,7 @@ function answersOf(profile: Profile): Answers {
     security: raw.security as Answers["security"],
     process: raw.process as Answers["process"],
     audience: raw.for === "other people" ? "other-people" : "just-me",
+    userLeads: raw.userLeads === true,
     usesPackages: raw.packages === true,
     git: raw.git as Answers["git"],
     hasTests: raw.tests === true,
@@ -51,8 +52,14 @@ describe("the builder hands out the tested prompt", () => {
     expect(assemblePrompt(armC.target, choicesOf(armC), armC.project)).toBe(readText("research/arm-c2-prompt.md"));
   });
 
-  it("derives exactly arm C's modules from arm C's answers", () => {
+  it("derives exactly arm C's modules from arm C's answers (before Who decides existed)", () => {
     expect(deriveChoices(answersOf(armC))).toEqual(choicesOf(armC));
+  });
+
+  it("produces the C3 text, research/arm-c3-prompt.md, byte for byte, and derives its modules from its answers", () => {
+    const armC3 = readProfile("research/arm-c3-profile.json");
+    expect(assemblePrompt(armC3.target, choicesOf(armC3), armC3.project)).toBe(readText("research/arm-c3-prompt.md"));
+    expect(deriveChoices(answersOf(armC3))).toEqual(choicesOf(armC3));
   });
 
   it("matches the reference script for the sample profile too", () => {

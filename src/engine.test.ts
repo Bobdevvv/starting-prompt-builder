@@ -11,11 +11,16 @@ const variantOf = (choices: readonly ModuleChoice[], moduleId: string): string |
 const answers = (changes: Partial<Answers>): Answers => ({ ...DEFAULT_ANSWERS, ...changes });
 
 describe("deriveChoices", () => {
-  it("starts from the core and the default git rules for Claude Code", () => {
+  it("starts from the core, Who decides and the default git rules for Claude Code", () => {
     expect(deriveChoices(DEFAULT_ANSWERS)).toEqual([
       { id: "core", variant: null },
+      { id: "user-leads", variant: null },
       { id: "git-workflow", variant: "with-permission" },
     ]);
+  });
+
+  it("leaves out Who decides when it is switched off", () => {
+    expect(idsOf(deriveChoices(answers({ userLeads: false })))).not.toContain("user-leads");
   });
 
   it("drops modules that only apply to Claude Code when the target is the browser", () => {

@@ -18,6 +18,8 @@ export interface Answers {
   readonly security: SecurityLevel;
   readonly process: ProcessLevel;
   readonly audience: Audience;
+  /** You decide, Claude advises (the "Who decides" rule set). On by default. */
+  readonly userLeads: boolean;
   readonly usesPackages: boolean;
   readonly git: GitChoice;
   readonly hasTests: boolean;
@@ -37,6 +39,7 @@ export const DEFAULT_ANSWERS: Answers = {
   security: "standard",
   process: "light",
   audience: "just-me",
+  userLeads: true,
   usesPackages: false,
   git: "with-permission",
   hasTests: false,
@@ -100,6 +103,7 @@ export function deriveChoices(answers: Answers): ModuleChoice[] {
   };
 
   choose("core");
+  if (answers.userLeads) choose("user-leads");
   if (answers.usesPackages || isStrict) choose("dependencies", isStrict ? "strict" : "ask-first");
   if (isStrict) {
     choose("supply-chain");

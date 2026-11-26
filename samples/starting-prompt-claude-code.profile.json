@@ -13,11 +13,15 @@
     "deployed": false,
     "manySessions": false,
     "learn": false,
-    "writing": false
+    "writing": false,
+    "userLeads": true
   },
   "modules": [
     [
       "core"
+    ],
+    [
+      "user-leads"
     ],
     [
       "dependencies",

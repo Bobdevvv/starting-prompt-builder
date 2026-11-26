@@ -1,0 +1,45 @@
+{
+  "target": "code",
+  "answers": {
+    "security": "standard",
+    "process": "light",
+    "for": "just me",
+    "packages": true,
+    "git": "with-permission",
+    "tests": true,
+    "public": false,
+    "interface": false,
+    "userData": false,
+    "deployed": false,
+    "manySessions": false,
+    "learn": false,
+    "writing": false,
+    "userLeads": true
+  },
+  "modules": [
+    [
+      "core"
+    ],
+    [
+      "user-leads"
+    ],
+    [
+      "dependencies",
+      "ask-first"
+    ],
+    [
+      "git-workflow",
+      "with-permission"
+    ],
+    [
+      "testing",
+      "standard"
+    ]
+  ],
+  "project": {
+    "what": "a repository of data exports for our analytics team.",
+    "stack": "nothing yet. Node.js is installed.",
+    "where": "an existing repo with sample exports. Read the README and look around before you answer.",
+    "goal": "Build a command-line tool that converts our CSV exports in exports/ into JSON for the analytics team."
+  }
+}
