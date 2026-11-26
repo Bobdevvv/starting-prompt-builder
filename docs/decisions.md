@@ -22,7 +22,7 @@ separately and has no backend.
   and in claude.ai.
 - **Secondary output: a `CLAUDE.md`**, for Claude Code only.
 
-## D4. Targets
+## D4. Targets (replaced by D12)
 **Decided by the owner.** Claude Code and claude.ai browser sessions, and nothing
 else for now. Exports for other assistants (such as `AGENTS.md`) are out of scope.
 
@@ -108,3 +108,16 @@ versions, with `ignore-scripts=true`. The lockfile has 92 packages, all from
 `registry.npmjs.org`, and `npm audit` found 0 vulnerabilities. The only package
 that declares an install script is `fsevents`, which is macOS-only and doesn't
 install on Windows; install scripts are off regardless.
+
+## D12. Other coding agents and browser chats (replaces D4)
+**Decided by the owner.** The builder supports three places to use a prompt:
+- **Claude Code.** The prompt offers a `CLAUDE.md`.
+- **Another coding agent**, such as Codex, Cursor or Gemini CLI. It gets the same
+  rules, and the prompt offers an `AGENTS.md`, the file many other agents read.
+- **A chat in the browser**, such as claude.ai, ChatGPT or Gemini.
+
+The rules already address "you", so no rule text changed, and the Claude Code
+prompt is still exactly the tested text. The builder says "the AI" where it means
+the assistant. **The prompts were tested with Claude only** (Claude Code, one
+Sonnet model). The builder, the README and the write-up say so, and describe
+other tools as expected to work, not tested.

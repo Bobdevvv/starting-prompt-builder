@@ -16,9 +16,15 @@ works, and is being prepared for the owner's site.
   project: does it deploy, handle user data, use third-party packages, live in
   a public repo?
 - Pick a small **core** of rules plus the **modules** that fit the answers.
-- Produce a **starting prompt** to paste as the first message of a session, in
-  Claude Code or in claude.ai. For Claude Code it can also produce a short
-  `CLAUDE.md`.
+- Produce a **starting prompt** to paste as the first message of a session: in
+  Claude Code, in another coding agent (Codex, Cursor, Gemini CLI and others),
+  or in a chat in the browser (claude.ai, ChatGPT, Gemini). For coding agents it
+  can also produce the instructions file they read at the start of every
+  session: `CLAUDE.md` for Claude Code, `AGENTS.md` for most others.
+
+**Tested with Claude.** The prompts were tested in Claude Code with a Claude
+Sonnet model (see below). The rules are written to any assistant ("you"), so
+they're expected to work with other tools too, but that hasn't been tested.
 
 Every module states what it prevents. The modules are plain Markdown in
 `modules/`, so you can use them without the builder.

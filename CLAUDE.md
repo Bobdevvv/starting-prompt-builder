@@ -1,7 +1,8 @@
 # CLAUDE.md: read this first, every session
 
-claude-session-starter is a kit that builds a starting prompt for a new Claude
-session (Claude Code or claude.ai in the browser) from a short questionnaire and
+claude-session-starter is a kit that builds a starting prompt for a new AI
+coding session (Claude Code, another coding agent, or a chat in the browser;
+tested with Claude) from a short questionnaire and
 a set of combinable rule modules. It also ships as an embedded entry on the
 owner's personal site, and it includes one small test of whether its starting
 prompt changes what a session does.

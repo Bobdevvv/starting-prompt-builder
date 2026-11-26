@@ -8,12 +8,12 @@
 // and the builder works exactly the same.
 
 import {
-  DEFAULT_ANSWERS, EMPTY_PROJECT, assembleClaudeMd, assemblePrompt, findConflicts, findModule, isAvailableFor,
+  DEFAULT_ANSWERS, EMPTY_PROJECT, assembleInstructionsFile, assemblePrompt, findConflicts, findModule, instructionsFileFor, isAvailableFor,
   measureText, resolveChoices, type Answers, type GitChoice, type ProjectDescription,
 } from "./engine";
 import { MODULES } from "./modules.data";
 
-type OutputKind = "prompt" | "claude-md";
+type OutputKind = "prompt" | "instructions-file";
 type BooleanAnswer = { [K in keyof Answers]: Answers[K] extends boolean ? K : never }[keyof Answers];
 type SegmentKey = "target" | "security" | "process" | "audience";
 
@@ -21,14 +21,15 @@ interface SegmentOption { readonly value: string; readonly label: string; readon
 
 const SEGMENTS: ReadonlyArray<{ key: SegmentKey; label: string; question: string; options: readonly SegmentOption[] }> = [
   { key: "target", label: "Used in", question: "Where will you start the session?", options: [
-    { value: "code", label: "Claude Code", detail: "Claude Code, in your terminal or editor." },
-    { value: "browser", label: "Browser", detail: "claude.ai in your browser. Rules about git and your computer are left out." },
+    { value: "code", label: "Claude Code", detail: "Claude Code, in your terminal or editor. This is where the prompts were tested." },
+    { value: "agent", label: "Other agent", detail: "Another coding agent, such as Codex, Cursor or Gemini CLI. Offers an AGENTS.md instead of a CLAUDE.md. Tested with Claude only; expected to work here too." },
+    { value: "browser", label: "Browser chat", detail: "A chat in your browser, such as claude.ai, ChatGPT or Gemini. Rules about git and your computer are left out. Tested with Claude only; expected to work in other chats too." },
   ] },
   { key: "security", label: "Security", question: "How strict should security be?", options: [
     { value: "standard", label: "Standard", detail: "Ask before adding packages. Keep secrets out of code." },
     { value: "strict", label: "Strict", detail: "Approved packages only, automatic dependency checks, secrets in a secret store, nothing outside the project folder." },
   ] },
-  { key: "process", label: "Process", question: "How much structure should Claude follow?", options: [
+  { key: "process", label: "Process", question: "How much structure should the AI follow?", options: [
     { value: "light", label: "Light", detail: "Plan first, then ask before risky steps." },
     { value: "thorough", label: "Thorough", detail: "A ticket for every change, proof that tests pass, a decision log and naming rules." },
   ] },
@@ -39,9 +40,9 @@ const SEGMENTS: ReadonlyArray<{ key: SegmentKey; label: string; question: string
 ];
 
 const GIT_OPTIONS: ReadonlyArray<{ value: GitChoice; label: string }> = [
-  { value: "with-permission", label: "Claude, asking before commits and pushes" },
-  { value: "pull-requests", label: "Claude, through branches and pull requests" },
-  { value: "main", label: "Claude, committing straight to main" },
+  { value: "with-permission", label: "The AI, asking before commits and pushes" },
+  { value: "pull-requests", label: "The AI, through branches and pull requests" },
+  { value: "main", label: "The AI, committing straight to main" },
   { value: "hands-off", label: "I do" },
 ];
 
@@ -68,7 +69,7 @@ const FACTS: readonly Fact[] = [
   { key: "hasInterface", label: "Has a user interface (website, app or screens)" },
   { key: "isDeployed", label: "Gets deployed, or runs on a server" },
   { key: "spansManySessions", label: "I'll work on it over many sessions",
-    settledBy: (a) => (a.target === "browser" ? { isChecked: false, note: "Only applies in Claude Code" }
+    settledBy: (a) => (a.target === "browser" ? { isChecked: false, note: "Only applies to coding agents" }
       : a.process === "thorough" ? { isChecked: true, note: "Included: thorough process keeps a work log" } : null) },
   { key: "wantsToLearn", label: "I want to learn along the way" },
   { key: "hasReadableText", label: "Has documentation or other text people read" },
@@ -299,7 +300,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   mainColumn.append(element("fieldset", {}, [
     element("legend", {}, [element("span", { class: "cssk-label" }, ["Who decides"])]),
     element("label", { class: "cssk-check" }, [leadInput,
-      "You lead: Claude advises, does exactly what you ask, checks its work and owns its mistakes"]),
+      "You lead: the AI advises, does exactly what you ask, checks its work and owns its mistakes"]),
   ]));
 
   // Git, as a select: four choices are too many for a segmented row at 280px.
@@ -428,17 +429,17 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
 
   // The generated text.
   const promptTab = element("button", { type: "button", "aria-pressed": "true" }, ["Starting prompt"]);
-  const claudeMdTab = element("button", { type: "button", "aria-pressed": "false" }, ["CLAUDE.md"]);
+  const fileTab = element("button", { type: "button", "aria-pressed": "false" }, ["CLAUDE.md"]);
   const sizeText = element("span", { class: "cssk-size" });
   const output = element("textarea", { readonly: "", rows: "16", spellcheck: "false", "aria-label": "The generated text" });
   const status = element("div", { class: "cssk-status", role: "status", "aria-live": "polite" });
   ticket.append(element("div", { class: "cssk-output" }, [
-    element("div", { class: "cssk-output-head" }, [element("div", { class: "cssk-tabs" }, [promptTab, claudeMdTab]), sizeText]),
+    element("div", { class: "cssk-output-head" }, [element("div", { class: "cssk-tabs" }, [promptTab, fileTab]), sizeText]),
     output, status,
   ]));
 
   promptTab.addEventListener("click", () => { outputKind = "prompt"; update(); }, { signal });
-  claudeMdTab.addEventListener("click", () => { outputKind = "claude-md"; update(); }, { signal });
+  fileTab.addEventListener("click", () => { outputKind = "instructions-file"; update(); }, { signal });
 
   copyButton.addEventListener("click", () => {
     const showManualCopy = (): void => {
@@ -457,7 +458,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
   }, { signal });
 
   downloadButton.addEventListener("click", () => {
-    const fileName = outputKind === "claude-md" ? "CLAUDE.md" : "starting-prompt.md";
+    const fileName = outputKind === "instructions-file" ? instructionsFileFor(answers.target) ?? "rules.md" : "starting-prompt.md";
     const url = URL.createObjectURL(new Blob([output.value], { type: "text/markdown;charset=utf-8" }));
     pendingDownloadUrls.add(url);
     element("a", { href: url, download: fileName }).click();
@@ -515,7 +516,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
       const detail = segmentDetails.get(segment.key);
       if (detail) detail.textContent = selected?.detail ?? "";
     }
-    gitField.hidden = answers.target !== "code";
+    gitField.hidden = answers.target === "browser";
     for (const fact of FACTS) {
       const controls = factControls.get(fact.key);
       if (!controls) continue;
@@ -548,13 +549,15 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
     warnings.replaceChildren(...findConflicts(choices).map((text) =>
       element("p", { class: "cssk-warning" }, [element("strong", {}, ["Check: "]), text])));
 
-    if (answers.target === "browser") outputKind = "prompt";
-    claudeMdTab.hidden = answers.target !== "code";
+    const instructionsFile = instructionsFileFor(answers.target);
+    if (!instructionsFile) outputKind = "prompt";
+    fileTab.hidden = instructionsFile === null;
+    fileTab.textContent = instructionsFile ?? "";
     promptTab.setAttribute("aria-pressed", String(outputKind === "prompt"));
-    claudeMdTab.setAttribute("aria-pressed", String(outputKind === "claude-md"));
+    fileTab.setAttribute("aria-pressed", String(outputKind === "instructions-file"));
 
-    output.value = outputKind === "claude-md"
-      ? assembleClaudeMd(choices, project)
+    output.value = outputKind === "instructions-file"
+      ? assembleInstructionsFile(answers.target, choices, project)
       : assemblePrompt(answers.target, choices, project);
     const size = measureText(output.value);
     sizeText.textContent = `${size.lines} lines · ${size.words} words`;

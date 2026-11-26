@@ -56,6 +56,7 @@ export function buildModuleData() {
       opening: frame.Opening,
       project: frame["The project"],
       firstReplyCode: frame["Your first reply"],
+      firstReplyAgent: frame["Your first reply for other coding agents"],
       firstReplyBrowser: frame["Your first reply in the browser"],
     },
   };
@@ -89,6 +90,7 @@ export function renderModuleDataFile() {
     "  readonly opening: string;",
     "  readonly project: string;",
     "  readonly firstReplyCode: string;",
+    "  readonly firstReplyAgent: string;",
     "  readonly firstReplyBrowser: string;",
     "}",
     "",

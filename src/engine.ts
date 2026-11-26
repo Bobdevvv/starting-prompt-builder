@@ -7,7 +7,23 @@
 
 import { FRAME, MODULES, type ModuleData } from "./modules.data";
 
-export type Target = "code" | "browser";
+/**
+ * Where the prompt is used: Claude Code ("code", where the prompts were
+ * tested), another coding agent such as Codex, Cursor or Gemini CLI ("agent"),
+ * or a chat in the browser ("browser"). Coding agents get the same rules; only
+ * the instructions file they're offered differs (CLAUDE.md or AGENTS.md).
+ */
+export type Target = "code" | "agent" | "browser";
+
+/** Which set of rules a target uses: the coding-agent rules, or the browser rules. */
+function rulesTargetOf(target: Target): "code" | "browser" {
+  return target === "browser" ? "browser" : "code";
+}
+
+/** The instructions file a coding agent reads at the start of every session. */
+export function instructionsFileFor(target: Target): "CLAUDE.md" | "AGENTS.md" | null {
+  return target === "code" ? "CLAUDE.md" : target === "agent" ? "AGENTS.md" : null;
+}
 export type SecurityLevel = "standard" | "strict";
 export type ProcessLevel = "light" | "thorough";
 export type Audience = "just-me" | "other-people";
@@ -89,7 +105,7 @@ export function findModule(moduleId: string): ModuleData | undefined {
 }
 
 export function isAvailableFor(moduleData: ModuleData, target: Target): boolean {
-  return moduleData.targets.includes(target);
+  return moduleData.targets.includes(rulesTargetOf(target));
 }
 
 /** Which modules the answers switch on, and with which variant (modules/README.md, "The questions"). */
@@ -162,7 +178,7 @@ export function findConflicts(choices: readonly ModuleChoice[]): string[] {
 /** The rules text for one module, variant and target, with the fallback described in modules/README.md. */
 export function rulesFor(moduleData: ModuleData, variant: string | null, target: Target): string {
   const suffix = variant ? `: ${variant}` : "";
-  const headings = target === "browser"
+  const headings = rulesTargetOf(target) === "browser"
     ? [`Rules in the browser${suffix}`, "Rules in the browser", `Rules${suffix}`]
     : [`Rules${suffix}`];
   for (const heading of headings) {
@@ -203,7 +219,8 @@ export function assemblePrompt(target: Target, choices: readonly ModuleChoice[],
     .replace("{stack}", () => filled.stack)
     .replace("{where it stands}", () => filled.where)
     .replace("{goal}", () => filled.goal);
-  const firstReply = target === "browser" ? FRAME.firstReplyBrowser : FRAME.firstReplyCode;
+  const firstReply = target === "browser" ? FRAME.firstReplyBrowser
+    : target === "agent" ? FRAME.firstReplyAgent : FRAME.firstReplyCode;
   const parts = [
     FRAME.opening,
     ...ruleSections(choices, target),
@@ -214,14 +231,19 @@ export function assemblePrompt(target: Target, choices: readonly ModuleChoice[],
 }
 
 /**
- * A CLAUDE.md for Claude Code: every rules section word for word, then a short
+ * The instructions file for a coding agent (CLAUDE.md for Claude Code,
+ * AGENTS.md for other agents): every rules section word for word, then a short
  * description of the project. The session's goal and the first-reply
  * instructions are left out, because they belong to one session only.
  */
-export function assembleClaudeMd(choices: readonly ModuleChoice[], project: ProjectDescription): string {
+export function assembleInstructionsFile(
+  target: Target, choices: readonly ModuleChoice[], project: ProjectDescription,
+): string {
+  const fileName = instructionsFileFor(target);
+  if (!fileName) throw new Error("A browser chat has no instructions file");
   const filled = filledProject(project);
   const parts = [
-    "# CLAUDE.md\n\nThe rules for working on this project. Follow them as written, in every session.",
+    `# ${fileName}\n\nThe rules for working on this project. Follow them as written, in every session.`,
     ...ruleSections(choices, "code"),
     `## The project\n\n- **What it is:** ${filled.what}\n- **Built with:** ${filled.stack}`,
   ];

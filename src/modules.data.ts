@@ -16,6 +16,7 @@ export interface FrameData {
   readonly opening: string;
   readonly project: string;
   readonly firstReplyCode: string;
+  readonly firstReplyAgent: string;
   readonly firstReplyBrowser: string;
 }
 
@@ -297,5 +298,6 @@ export const FRAME: FrameData = {
   "opening": "I'm starting work on a project with you. Below are the rules I'd like us to\nwork by, a short description of the project, and what I'd like in your first\nreply.",
   "project": "- **What it is:** {what it is}\n- **Built with:** {stack}\n- **Where it stands:** {where it stands}\n- **This session's goal:** {goal}",
   "firstReplyCode": "Don't change anything yet. In your first reply:\n- summarise the project and this session's goal in your own words;\n- list anything that's unclear;\n- propose the first step.\n\nThen wait for my approval.\n\nIf this project has no `CLAUDE.md`, offer to create one from this message:\nevery rules section above \"The project\", word for word, followed by a short\ndescription of the project. Don't summarise, shorten or drop any rule. If a\n`CLAUDE.md` already exists, offer to add the rules it doesn't have yet, without\nchanging what's there. That way the rules survive when a long session is\ncompacted, and later sessions start with them too.",
+  "firstReplyAgent": "Don't change anything yet. In your first reply:\n- summarise the project and this session's goal in your own words;\n- list anything that's unclear;\n- propose the first step.\n\nThen wait for my approval.\n\nIf this project has no `AGENTS.md`, offer to create one from this message:\nevery rules section above \"The project\", word for word, followed by a short\ndescription of the project. Don't summarise, shorten or drop any rule. If an\n`AGENTS.md` already exists, offer to add the rules it doesn't have yet, without\nchanging what's there. That way later sessions start with the same rules.",
   "firstReplyBrowser": "Don't write any code yet. In your first reply:\n- summarise the project and this session's goal in your own words;\n- list anything that's unclear;\n- propose the first step.\n\nThen wait for my approval."
 };

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_ANSWERS, EMPTY_PROJECT, PROJECT_PLACEHOLDERS, assembleClaudeMd, assemblePrompt, deriveChoices,
+  DEFAULT_ANSWERS, EMPTY_PROJECT, PROJECT_PLACEHOLDERS, assembleInstructionsFile, assemblePrompt, deriveChoices, instructionsFileFor,
   findConflicts, findModule, measureText, resolveChoices, rulesFor, type Answers, type ModuleChoice,
 } from "./engine";
 import { MODULES } from "./modules.data";
@@ -160,14 +160,46 @@ describe("assemblePrompt", () => {
   });
 });
 
-describe("assembleClaudeMd", () => {
+describe("assembleInstructionsFile", () => {
   it("keeps every rules section and leaves out what belongs to one session", () => {
     const choices = resolveChoices(answers({ usesPackages: true, hasTests: true }), {});
-    const claudeMd = assembleClaudeMd(choices, { what: "a converter", stack: "Node", where: "new", goal: "start" });
+    const claudeMd = assembleInstructionsFile("code", choices, { what: "a converter", stack: "Node", where: "new", goal: "start" });
+    expect(claudeMd.startsWith("# CLAUDE.md")).toBe(true);
     for (const choice of choices) expect(claudeMd).toContain(`## ${findModule(choice.id)?.title}`);
     expect(claudeMd).toContain("- **What it is:** a converter");
     expect(claudeMd).not.toContain("Your first reply");
     expect(claudeMd).not.toContain("This session's goal");
+  });
+});
+
+describe("other coding agents", () => {
+  it("get the same rules as Claude Code, including the ones that only apply to coding agents", () => {
+    const forClaudeCode = resolveChoices(answers({ security: "strict", process: "thorough" }), {});
+    const forAgent = resolveChoices(answers({ target: "agent", security: "strict", process: "thorough" }), {});
+    expect(forAgent).toEqual(forClaudeCode);
+    expect(idsOf(forAgent)).toEqual(expect.arrayContaining(["git-workflow", "work-log", "local-machine"]));
+  });
+
+  it("are offered an AGENTS.md instead of a CLAUDE.md, and the prompt never names Claude", () => {
+    const choices = resolveChoices(answers({ target: "agent", usesPackages: true }), {});
+    const prompt = assemblePrompt("agent", choices, EMPTY_PROJECT);
+    expect(prompt).toContain("AGENTS.md");
+    expect(prompt).not.toMatch(/claude/i);
+    expect(assembleInstructionsFile("agent", choices, EMPTY_PROJECT).startsWith("# AGENTS.md")).toBe(true);
+  });
+
+  it("only coding agents have an instructions file", () => {
+    expect(instructionsFileFor("code")).toBe("CLAUDE.md");
+    expect(instructionsFileFor("agent")).toBe("AGENTS.md");
+    expect(instructionsFileFor("browser")).toBeNull();
+  });
+});
+
+describe("a browser chat", () => {
+  it("gets a prompt that never names Claude, so it works in any chat", () => {
+    const allOn = answers({ target: "browser", security: "strict", process: "thorough", usesPackages: true,
+      isPublicRepo: true, hasInterface: true, handlesUserData: true, isDeployed: true, wantsToLearn: true });
+    expect(assemblePrompt("browser", resolveChoices(allOn, {}), EMPTY_PROJECT)).not.toMatch(/claude/i);
   });
 });
 

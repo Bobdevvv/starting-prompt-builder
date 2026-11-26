@@ -65,7 +65,7 @@ These decide most of the prompt.
 
 | question | answers | what it changes |
 |---|---|---|
-| **Where will you start the session?** | Claude Code / claude.ai in the browser | Which version of each rule is used. Modules that only apply to Claude Code (`git-workflow`, `work-log`, `local-machine`) are left out in the browser. |
+| **Where will you start the session?** | Claude Code / another coding agent / a chat in the browser | Which version of each rule is used. Coding agents all get the same rules; Claude Code is offered a `CLAUDE.md`, other agents an `AGENTS.md`. Modules that only apply to coding agents (`git-workflow`, `work-log`, `local-machine`) are left out in the browser. |
 | **How strict should security be?** | Standard / Strict | **Strict:** `dependencies` becomes strict, and `supply-chain`, `secrets-strict` and `local-machine` are added. |
 | **How much structure should Claude follow?** | Light / Thorough | **Thorough:** `testing` becomes strict-gate, `work-log` becomes full, and `code-clarity` is added. |
 | **Who will use what you're building?** | Only me / Other people too | **Other people too:** `testing` is added, plus `accessibility` and `budgets` if it has an interface. This is about the people who use the result, not about who can see the code (that is the public-repository question). |

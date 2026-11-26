@@ -8,8 +8,9 @@ targets: code, browser
 
 The starting prompt is: **Opening**, then each chosen module's rules under its
 title as a `##` heading (the core's title is "How we work"), then
-**The project**, then **Your first reply**. Text in `{braces}` is filled in by
-the builder.
+**The project**, then **Your first reply**: the Claude Code version, the version
+for other coding agents (which offers an `AGENTS.md`, the file many other agents
+read), or the browser version. Text in `{braces}` is filled in by the builder.
 
 ## Opening
 
@@ -39,6 +40,21 @@ description of the project. Don't summarise, shorten or drop any rule. If a
 `CLAUDE.md` already exists, offer to add the rules it doesn't have yet, without
 changing what's there. That way the rules survive when a long session is
 compacted, and later sessions start with them too.
+
+## Your first reply for other coding agents
+
+Don't change anything yet. In your first reply:
+- summarise the project and this session's goal in your own words;
+- list anything that's unclear;
+- propose the first step.
+
+Then wait for my approval.
+
+If this project has no `AGENTS.md`, offer to create one from this message:
+every rules section above "The project", word for word, followed by a short
+description of the project. Don't summarise, shorten or drop any rule. If an
+`AGENTS.md` already exists, offer to add the rules it doesn't have yet, without
+changing what's there. That way later sessions start with the same rules.
 
 ## Your first reply in the browser
 
