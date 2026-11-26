@@ -3,8 +3,9 @@
 // text below. The only file that touches the browser; all logic lives in
 // engine.ts. Built from standard form controls (radio groups, checkboxes,
 // selects, <details>), so keyboard use and screen readers work without extra
-// code. Nothing is stored between visits (decision D10). There is no animation,
-// so reduced-motion preferences need no separate path.
+// code. Nothing is stored between visits (decision D10). Animations are short
+// and decorative only; with prefers-reduced-motion they are all switched off,
+// and the builder works exactly the same.
 
 import {
   DEFAULT_ANSWERS, EMPTY_PROJECT, assembleClaudeMd, assemblePrompt, findConflicts, findModule, isAvailableFor,
@@ -167,6 +168,29 @@ const STYLE_TEXT = `
 .cssk-status { min-height: 1.45em; margin-top: 8px; font-size: 0.8125rem; color: var(--color-muted); }
 .cssk :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 .cssk [hidden] { display: none !important; }
+
+/* Motion. Short and decorative only: nothing depends on it. */
+.cssk { interpolate-size: allow-keywords; }
+.cssk-segment span { transition: background-color 180ms ease, color 180ms ease; }
+.cssk-check, .cssk button, .cssk summary, .cssk select, .cssk input[type="text"] {
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+.cssk input[type="checkbox"] { transition: transform 120ms ease; }
+.cssk input[type="checkbox"]:active { transform: scale(0.88); }
+.cssk summary::before { transition: background-color 180ms ease, color 180ms ease; }
+.cssk details[open] > summary::before { background: var(--color-accent); color: var(--color-bg); }
+.cssk details::details-content { height: 0; overflow: clip;
+  transition: height 240ms ease, content-visibility 240ms allow-discrete; }
+.cssk details[open]::details-content { height: auto; }
+@keyframes cssk-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.cssk details[open] .cssk-advanced-body { animation: cssk-reveal 240ms ease-out; }
+@keyframes cssk-enter { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
+.cssk-list li.cssk-enter { animation: cssk-enter 220ms ease-out; }
+@keyframes cssk-changed { from { color: var(--color-accent); } }
+.cssk-list li span.cssk-changed { animation: cssk-changed 700ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .cssk *, .cssk *::before, .cssk *::after, .cssk details::details-content {
+    animation: none !important; transition: none !important; }
+}
 `;
 
 let instanceCount = 0;
@@ -395,6 +419,45 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
     status.textContent = `Downloaded ${fileName}.`;
   }, { signal });
 
+  // The summary list keeps one <li> per rule set, so only real changes animate:
+  // a rule set that is added slides in, and a changed version flashes once.
+  // Typing in a text field changes neither, so nothing moves while typing.
+  const summaryItems = new Map<string, { item: HTMLLIElement; value: HTMLSpanElement }>();
+  let isFirstRender = true;
+  const playOnce = (target: HTMLElement, className: string): void => {
+    target.classList.remove(className);
+    void target.offsetWidth; // restart the animation if it is already running
+    target.classList.add(className);
+    target.addEventListener("animationend", () => target.classList.remove(className), { once: true, signal });
+  };
+
+  function renderSummary(choices: ReturnType<typeof resolveChoices>): void {
+    const wantedIds = new Set(choices.map((choice) => choice.id));
+    for (const [moduleId, entry] of summaryItems) {
+      if (!wantedIds.has(moduleId)) {
+        entry.item.remove();
+        summaryItems.delete(moduleId);
+      }
+    }
+    for (const choice of choices) {
+      const valueText = choice.variant ? VARIANT_LABELS[choice.variant] ?? choice.variant : "on";
+      let entry = summaryItems.get(choice.id);
+      if (!entry) {
+        const name = choice.id === "core" ? "Core rules" : findModule(choice.id)?.title ?? choice.id;
+        const value = element("span", {}, [valueText]);
+        entry = { item: element("li", {}, [element("span", {}, [name]), value]), value };
+        summaryItems.set(choice.id, entry);
+        if (!isFirstRender) playOnce(entry.item, "cssk-enter");
+      } else if (entry.value.textContent !== valueText) {
+        entry.value.textContent = valueText;
+        playOnce(entry.value, "cssk-changed");
+      }
+      // appendChild moves an existing item without re-creating it, so its animation isn't replayed.
+      summaryList.appendChild(entry.item);
+    }
+    isFirstRender = false;
+  }
+
   function update(): void {
     for (const segment of SEGMENTS) {
       const selected = segment.options.find((option) => option.value === answers[segment.key]);
@@ -428,12 +491,7 @@ export function initEmbeddedEntry(root: HTMLElement): () => void {
     advancedCount.textContent =
       `Turn individual rule sets on or off. ${choices.length} of ${availableCount} are included now.`;
 
-    summaryList.replaceChildren(...choices.map((choice) => {
-      const moduleData = findModule(choice.id);
-      const name = choice.id === "core" ? "Core rules" : moduleData?.title ?? choice.id;
-      return element("li", {}, [element("span", {}, [name]),
-        element("span", {}, [choice.variant ? VARIANT_LABELS[choice.variant] ?? choice.variant : "on"])]);
-    }));
+    renderSummary(choices);
     warnings.replaceChildren(...findConflicts(choices).map((text) =>
       element("p", { class: "cssk-warning" }, [element("strong", {}, ["Check: "]), text])));
 
