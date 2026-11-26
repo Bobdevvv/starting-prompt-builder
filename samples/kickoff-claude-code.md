@@ -88,6 +88,19 @@ the project, and what I'd like from your first reply.
 - Announce important changes (errors, results, completion) in an `aria-live`
   region or as visible text.
 
+## Size and speed budgets
+
+- Respect the project's budgets (for example a maximum JavaScript size, or a
+  minimum Lighthouse performance score). If there aren't any yet, propose
+  numbers before the first feature.
+- Measure what changes, before and after, when a change adds code, assets or
+  requests. Report the numbers, not an impression.
+- If a change would go over a budget, stop and report the measured size.
+  Raising a budget is my decision, and trimming quality quietly to fit is not
+  the answer.
+- Load code only where it's used. A page that doesn't need a feature shouldn't
+  download it.
+
 ## The project
 
 - **What it is:** a habit tracker that runs in the browser and keeps its data on the device.

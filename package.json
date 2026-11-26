@@ -8,7 +8,11 @@
     "node": "24.11.0"
   },
   "scripts": {
-    "test:research": "node --test research/score.test.mjs"
+    "build:modules": "node scripts/build-modules.mjs",
+    "test": "node scripts/build-modules.mjs --check && vitest run src tests",
+    "test:research": "node --test research/score.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "size": "node scripts/check-size.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2",

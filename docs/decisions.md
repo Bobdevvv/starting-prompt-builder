@@ -90,3 +90,21 @@ the modules may be used and published without credit. Otherwise, everyone who
 commits a generated `CLAUDE.md` to a public repo would owe an attribution
 notice, which defeats the purpose of the kit. Credit is still asked for when
 someone republishes the modules themselves.
+
+## D10. The builder remembers nothing
+**Decided by the owner.** Every visit starts from the same blank form, and nothing
+is stored in the browser. Every project is different, and leftover answers from
+the last project are an easy way to generate the wrong rules without noticing.
+
+## D11. The handover folder has five files
+**Decided by the owner.** The host's spec lists four (`engine.ts`,
+`engine.test.ts`, `view.ts`, `README.md`). The module text is kept in a fifth,
+generated file, `modules.data.ts`, so the rules stay separate from the logic.
+That file can be regenerated from `modules/` and checked by a test, and it
+changes only when the wording changes. The handover README explains this.
+
+**D8, installed (2026-11-26):** `typescript` 7.0.2 and `vitest` 4.1.12, exact
+versions, with `ignore-scripts=true`. The lockfile has 92 packages, all from
+`registry.npmjs.org`, and `npm audit` found 0 vulnerabilities. The only package
+that declares an install script is `fsevents`, which is macOS-only and doesn't
+install on Windows; install scripts are off regardless.
