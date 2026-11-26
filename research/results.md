@@ -65,5 +65,6 @@ These are observations, not measured outcomes.
 
 A full arm C run used on average about 126,000 cached input tokens, 10,800
 newly cached tokens and 2,900 output tokens. Arm A runs were stopped at their
-first violation, so they used less. All 21 attempts together used roughly 20%
-of the owner's five-hour Claude Pro usage window.
+first violation, so they used less. All 21 attempts together used at most about
+11% of the owner's five-hour Claude Pro usage window. That was read from the
+usage meter, which also counted other work in the same window.
