@@ -24,10 +24,15 @@ Every module states what it prevents. The modules are plain Markdown in
 ## Does it work?
 
 One small test, with its rules fixed before the first run
-(`research/protocol.md`). Fresh Claude Code sessions get a building task, half
-of them with the kit's kickoff prompt and half without. A script reads each
-session's log and checks whether it started building before agreeing on a plan.
-Every run is reported, whatever it shows.
+(`research/protocol.md`). Fresh Claude Code sessions got a building task with
+deliberately ambiguous data, half of them with the kit's kickoff prompt and half
+without. A script read each session's log and checked whether it started
+building before agreeing on a plan.
+
+**Without the kit, 10 of 10 sessions started writing code straight away. With
+it, 0 of 10 did.** Each of those asked about the ambiguous data and waited
+(p = 5.4 × 10⁻⁶). What this does and doesn't show, and the one correction made
+along the way, are in `research/results.md`.
 
 ## License
 
